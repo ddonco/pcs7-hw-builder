@@ -14,23 +14,31 @@ export function buildHW(
   hardwareRacks: {
     [rack: string]: { [slot: string]: any };
   },
+  hardwareInfo: { [type: string]: number },
   ioStartAddress: { [moduleType: string]: number } = {},
   groupIoTypes: boolean = false
 ): any {
   const sortedHW = sortHW(hardwareRacks);
 
+  let addressedHW: { [rack: string]: { [slot: string]: any } };
+  if (groupIoTypes) {
+    addressedHW = getGroupedIoAddresses(sortedHW, hardwareInfo, ioStartAddress);
+  } else {
+    addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddress);
+  }
+
   let writeStream = fs.createWriteStream("e:/dev/electron/Sample_Hardware.cfg");
   let buildString: string;
 
-  for (const rack in sortedHW) {
+  for (const rack in addressedHW) {
     let rackName = `RIO-${rack}`;
     let deviceNumber = parseInt(rack, 10);
     buildString = buildET200SPHA(rackName, deviceNumber);
     writeStream.write(buildString);
 
-    // for (const slot in sortedHW[rack]) {
+    // for (const slot in addressedHW[rack]) {
     for (const [index, [slot, value]] of Object.entries(
-      Object.entries(sortedHW[rack])
+      Object.entries(addressedHW[rack])
     )) {
       if (index === "0" && slot !== "2") {
         childLogger.error(
@@ -38,58 +46,58 @@ export function buildHW(
           {
             rack: rack,
             slot: slot,
-            first_channel: sortedHW[rack][slot].channels[0].tagName,
+            first_channel: addressedHW[rack][slot].channels[0].tagName,
           }
         );
       }
 
-      if (sortedHW[rack][slot].type === "DI") {
+      if (addressedHW[rack][slot].type === "DI") {
         buildString = buildDIConfig(
-          sortedHW[rack][slot].rack,
-          sortedHW[rack][slot].slot,
-          sortedHW[rack][slot].partNumber,
-          sortedHW[rack][slot].description,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].totalInBytes,
-          sortedHW[rack][slot].channels
+          addressedHW[rack][slot].rack,
+          addressedHW[rack][slot].slot,
+          addressedHW[rack][slot].partNumber,
+          addressedHW[rack][slot].description,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].totalInBytes,
+          addressedHW[rack][slot].channels
         );
-      } else if (sortedHW[rack][slot].type === "DO") {
+      } else if (addressedHW[rack][slot].type === "DO") {
         buildString = buildDOConfig(
-          sortedHW[rack][slot].rack,
-          sortedHW[rack][slot].slot,
-          sortedHW[rack][slot].partNumber,
-          sortedHW[rack][slot].description,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].totalInBytes,
-          sortedHW[rack][slot].totalOutBytes,
-          sortedHW[rack][slot].channels
+          addressedHW[rack][slot].rack,
+          addressedHW[rack][slot].slot,
+          addressedHW[rack][slot].partNumber,
+          addressedHW[rack][slot].description,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].totalInBytes,
+          addressedHW[rack][slot].totalOutBytes,
+          addressedHW[rack][slot].channels
         );
-      } else if (sortedHW[rack][slot].type === "AI") {
+      } else if (addressedHW[rack][slot].type === "AI") {
         buildString = buildAIConfig(
-          sortedHW[rack][slot].rack,
-          sortedHW[rack][slot].slot,
-          sortedHW[rack][slot].partNumber,
-          sortedHW[rack][slot].revision,
-          sortedHW[rack][slot].description,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].totalInBytes,
-          sortedHW[rack][slot].hartModulePartNumber,
-          sortedHW[rack][slot].channels
+          addressedHW[rack][slot].rack,
+          addressedHW[rack][slot].slot,
+          addressedHW[rack][slot].partNumber,
+          addressedHW[rack][slot].revision,
+          addressedHW[rack][slot].description,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].totalInBytes,
+          addressedHW[rack][slot].hartModulePartNumber,
+          addressedHW[rack][slot].channels
         );
-      } else if (sortedHW[rack][slot].type === "AO") {
+      } else if (addressedHW[rack][slot].type === "AO") {
         buildString = buildAOConfig(
-          sortedHW[rack][slot].rack,
-          sortedHW[rack][slot].slot,
-          sortedHW[rack][slot].partNumber,
-          sortedHW[rack][slot].revision,
-          sortedHW[rack][slot].description,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].startAddress,
-          sortedHW[rack][slot].totalInBytes,
-          sortedHW[rack][slot].totalOutBytes,
-          sortedHW[rack][slot].hartModulePartNumber,
-          sortedHW[rack][slot].channels
+          addressedHW[rack][slot].rack,
+          addressedHW[rack][slot].slot,
+          addressedHW[rack][slot].partNumber,
+          addressedHW[rack][slot].revision,
+          addressedHW[rack][slot].description,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].startAddress,
+          addressedHW[rack][slot].totalInBytes,
+          addressedHW[rack][slot].totalOutBytes,
+          addressedHW[rack][slot].hartModulePartNumber,
+          addressedHW[rack][slot].channels
         );
       }
       writeStream.write(buildString);
@@ -163,4 +171,93 @@ function getStartingAddresses(
   return startingAddresses;
 }
 
-// function groupIoTypes
+function getShiftedIoAddresses(
+  hardwareRacks: { [rack: string]: { [slot: string]: any } },
+  startAddress: { [ioType: string]: number }
+): { [rack: string]: { [slot: string]: any } } {
+  for (const rack in hardwareRacks) {
+    for (const slot in hardwareRacks[rack]) {
+      if (
+        hardwareRacks[rack][slot].type == "AI" ||
+        hardwareRacks[rack][slot].type == "AO"
+      ) {
+        hardwareRacks[rack][slot].startAddress += startAddress["aiStart"] - 512;
+      }
+      if (
+        hardwareRacks[rack][slot].type == "DI" ||
+        hardwareRacks[rack][slot].type == "DO"
+      ) {
+        hardwareRacks[rack][slot].startAddress += startAddress["diStart"];
+      }
+    }
+  }
+  return hardwareRacks;
+}
+
+function getGroupedIoAddresses(
+  hardwareRacks: { [rack: string]: { [slot: string]: any } },
+  hardwareInfo: { [ioType: string]: number },
+  startAddress: { [ioType: string]: number }
+): {
+  [rack: string]: { [slot: string]: any };
+} {
+  let nextAddress = {
+    AI: 0,
+    AO: 0,
+    DI: 0,
+    DO: 0,
+  };
+
+  if (
+    startAddress["aoStart"] <
+    startAddress["aiStart"] + hardwareInfo["aiTotalBytes"]
+  ) {
+    childLogger.error(
+      "beginning of ao module addressing must come after all address space reserved by ai modules",
+      {
+        aiStart: startAddress["aiStart"],
+        aiTotalBytes: hardwareInfo["aiTotalBytes"],
+        aoStart: startAddress["aoStart"],
+      }
+    );
+  }
+  if (
+    startAddress["doStart"] <
+    startAddress["diStart"] + hardwareInfo["diTotalBytes"]
+  ) {
+    childLogger.error(
+      "beginning of do module addressing must come after all address space reserved by di modules",
+      {
+        aiStart: startAddress["diStart"],
+        aiTotalBytes: hardwareInfo["diTotalBytes"],
+        aoStart: startAddress["doStart"],
+      }
+    );
+  }
+
+  for (const rack in hardwareRacks) {
+    for (const slot in hardwareRacks[rack]) {
+      if (hardwareRacks[rack][slot].type == "AI") {
+        hardwareRacks[rack][slot].startAddress =
+          startAddress["aiStart"] + nextAddress["AI"];
+        nextAddress["AI"] = hardwareRacks[rack][slot].nextStartAddress();
+      }
+      if (hardwareRacks[rack][slot].type == "AO") {
+        hardwareRacks[rack][slot].startAddress =
+          startAddress["aoStart"] + nextAddress["AO"];
+        nextAddress["AO"] = hardwareRacks[rack][slot].nextStartAddress();
+      }
+      if (hardwareRacks[rack][slot].type == "DI") {
+        hardwareRacks[rack][slot].startAddress =
+          startAddress["diStart"] + nextAddress["DI"];
+        nextAddress["DI"] = hardwareRacks[rack][slot].nextStartAddress();
+      }
+      if (hardwareRacks[rack][slot].type == "DO") {
+        hardwareRacks[rack][slot].startAddress =
+          startAddress["doStart"] + nextAddress["DO"];
+        nextAddress["DO"] = hardwareRacks[rack][slot].nextStartAddress();
+      }
+    }
+  }
+  return hardwareRacks;
+}

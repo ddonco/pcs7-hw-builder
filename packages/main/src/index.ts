@@ -99,7 +99,7 @@ app.on("web-contents-created", (event, webContents) => {
 
       webContents.send("fromMain", "parse complete");
       console.log("PARSED IO:", hardwareRacks);
-      sortedRacks = buildHW(hardwareRacks);
+      sortedRacks = buildHW(hardwareRacks, hardwareInfo);
     }
   });
 });

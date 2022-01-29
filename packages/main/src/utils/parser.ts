@@ -104,7 +104,6 @@ export function parseAssignedIO(ioFilePath: string): [
         addressLookup,
         channelType
       );
-      console.log("channel type:", channelType, "built module:", hwModule);
       hardwareRacks[rack] = {};
       hardwareRacks[rack][slot] = hwModule;
       assignSuccess = hardwareRacks[rack][slot].assignChannel(
