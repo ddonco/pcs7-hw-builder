@@ -152,24 +152,24 @@ function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
   return sortedHW;
 }
 
-function getStartingAddresses(
-  hwInfo: { [moduleTyle: string]: number },
-  userParams: { [moduleTyle: string]: number },
-  groupIoTypes: boolean = false
-): { [moduleTyle: string]: number } {
-  let startingAddresses = {
-    diStart: userParams["diStart"],
-    doStart:
-      userParams["doStart"] +
-      (groupIoTypes ? userParams["digitalOffset"] + hwInfo["diTotalBytes"] : 0),
-    aiStart: userParams["aiStart"],
-    aoStart:
-      userParams["aoStart"] +
-      userParams["analogOffset"] +
-      hwInfo["aiTotalBytes"],
-  };
-  return startingAddresses;
-}
+// function getStartingAddresses(
+//   hwInfo: { [moduleTyle: string]: number },
+//   userParams: { [moduleTyle: string]: number },
+//   groupIoTypes: boolean = false
+// ): { [moduleTyle: string]: number } {
+//   let startingAddresses = {
+//     diStart: userParams["diStart"],
+//     doStart:
+//       userParams["doStart"] +
+//       (groupIoTypes ? userParams["digitalOffset"] + hwInfo["diTotalBytes"] : 0),
+//     aiStart: userParams["aiStart"],
+//     aoStart:
+//       userParams["aoStart"] +
+//       userParams["analogOffset"] +
+//       hwInfo["aiTotalBytes"],
+//   };
+//   return startingAddresses;
+// }
 
 function getShiftedIoAddresses(
   hardwareRacks: { [rack: string]: { [slot: string]: any } },
@@ -202,10 +202,10 @@ function getGroupedIoAddresses(
   [rack: string]: { [slot: string]: any };
 } {
   let nextAddress = {
-    AI: 0,
-    AO: 0,
-    DI: 0,
-    DO: 0,
+    AI: startAddress["aiStart"],
+    AO: startAddress["aoStart"],
+    DI: startAddress["diStart"],
+    DO: startAddress["doStart"],
   };
 
   if (
@@ -238,23 +238,19 @@ function getGroupedIoAddresses(
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
       if (hardwareRacks[rack][slot].type == "AI") {
-        hardwareRacks[rack][slot].startAddress =
-          startAddress["aiStart"] + nextAddress["AI"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["AI"];
         nextAddress["AI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type == "AO") {
-        hardwareRacks[rack][slot].startAddress =
-          startAddress["aoStart"] + nextAddress["AO"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["AO"];
         nextAddress["AO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type == "DI") {
-        hardwareRacks[rack][slot].startAddress =
-          startAddress["diStart"] + nextAddress["DI"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["DI"];
         nextAddress["DI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type == "DO") {
-        hardwareRacks[rack][slot].startAddress =
-          startAddress["doStart"] + nextAddress["DO"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["DO"];
         nextAddress["DO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
     }

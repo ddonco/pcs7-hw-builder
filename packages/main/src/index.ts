@@ -86,6 +86,7 @@ app.on("web-contents-created", (event, webContents) => {
     console.log(args);
     const filePath = "e:/dev/electron/Sample_IO_List.xlsx";
     if (args === "parse IO") {
+      let groupIOAddresses = true;
       let userAddressParams = {
         diStart: 0,
         doStart: 0,
@@ -93,13 +94,27 @@ app.on("web-contents-created", (event, webContents) => {
         aoStart: 512,
       };
 
+      if (groupIOAddresses) {
+        userAddressParams = {
+          diStart: 0,
+          doStart: 14,
+          aiStart: 512,
+          aoStart: 954,
+        };
+      }
+
       webContents.send("fromMain", "parse started");
 
       [hardwareRacks, hardwareInfo] = parseAssignedIO(filePath);
 
       webContents.send("fromMain", "parse complete");
-      console.log("PARSED IO:", hardwareRacks);
-      sortedRacks = buildHW(hardwareRacks, hardwareInfo);
+      console.log("HW INFO:", hardwareInfo);
+      sortedRacks = buildHW(
+        hardwareRacks,
+        hardwareInfo,
+        userAddressParams,
+        groupIOAddresses
+      );
     }
   });
 });
