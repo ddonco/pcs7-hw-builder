@@ -49,6 +49,7 @@
     "windicss": "^3.4.3"
   },
   "dependencies": {
+    "data-forge": "^1.9.2",
     "electron-updater": "4.6.5",
     "node-xlsx": "^0.21.0",
     "vue": "3.2.29",

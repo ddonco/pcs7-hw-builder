@@ -27,7 +27,7 @@ export class Channel {
   }
 }
 
-class HWModule {
+export class HWModule {
   partNumber: string = "";
   description: string = "";
   type: string = "";
@@ -37,9 +37,10 @@ class HWModule {
   totalOutBytes: number = 2;
   revision: string = "V1.0";
   channels: Channel[] = [];
+  nextOpenChannel: number = 0;
   startAddress: number = 0;
-  rack: number = 1;
-  slot: number = 2;
+  rack: number = 0;
+  slot: number = 0;
 
   assignChannel(
     rack: number,
@@ -77,6 +78,8 @@ class HWModule {
     this.channels[channelNumber - 1].tagName = tagName;
     this.channels[channelNumber - 1].description = description;
     this.channels[channelNumber - 1].spare = spare;
+    this.nextOpenChannel++;
+    if (this.nextOpenChannel > this.channelCount) this.nextOpenChannel = -1;
     // Channel was assigned
     return true;
   }
@@ -98,11 +101,12 @@ export class DI_6DL11316GF000PK0 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "V1.0";
   channels: Channel[] = [];
+  nextOpenChannel: number = 0;
   startAddress: number = 0;
-  rack: number = 1;
-  slot: number = 2;
+  rack: number = 0;
+  slot: number = 0;
 
-  constructor(startAddress: number, rack: number, slot: number) {
+  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -135,11 +139,12 @@ export class DO_6DL11326BH000PH1 extends HWModule {
   totalOutBytes: number = 2;
   revision: string = "V1.0";
   channels: Channel[] = [];
+  nextOpenChannel: number = 0;
   startAddress: number = 0;
-  rack: number = 1;
-  slot: number = 2;
+  rack: number = 0;
+  slot: number = 0;
 
-  constructor(startAddress: number, rack: number, slot: number) {
+  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -174,11 +179,12 @@ export class AI_6DL11346TH000PH1 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "V1.1";
   channels: Channel[] = [];
+  nextOpenChannel: number = 0;
   startAddress: number = 0;
-  rack: number = 1;
-  slot: number = 2;
+  rack: number = 0;
+  slot: number = 0;
 
-  constructor(startAddress: number, rack: number, slot: number) {
+  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -213,11 +219,12 @@ export class AO_6DL11356TF000PH1 extends HWModule {
   totalOutBytes: number = 16;
   revision: string = "V1.0";
   channels: Channel[] = [];
+  nextOpenChannel: number = 0;
   startAddress: number = 0;
-  rack: number = 1;
-  slot: number = 2;
+  rack: number = 0;
+  slot: number = 0;
 
-  constructor(startAddress: number, rack: number, slot: number) {
+  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;

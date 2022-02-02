@@ -1,10 +1,12 @@
 import xlsx from "node-xlsx";
+import { DataFrame } from "data-forge";
 const fs = require("fs");
 import {
   DI_6DL11316GF000PK0,
   DO_6DL11326BH000PH1,
   AI_6DL11346TH000PH1,
   AO_6DL11356TF000PH1,
+  HWModule,
 } from "./hw_module";
 import { hwBuilderLogger } from "./logger";
 
@@ -195,33 +197,153 @@ function buildModule(
   return [{}, addressLookup];
 }
 
-export function parseRawIO(ioFilePath: string): {
+export function parseRawIO(
+  ioFilePath: string,
+  groupIoModuleTypes: boolean = false
+): {
   [rack: string]: { [slot: string]: any };
 } {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
-
   const data: any = worksheet[0]["data"];
+  console.log();
+  let df = new DataFrame({
+    columnNames: data[0],
+    rows: data.slice(1, data.length),
+  });
 
-  let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
-  let hwModule: any;
+  df = df.orderBy((row: any) => row.Tagnames);
+  let dfArray = df.orderBy((row: any) => row.Type).toArray();
 
   let addressLookup: { [type: string]: number } = {
     nextDigitalAddress: DIGITAL_START_ADDRESS,
     nextAnalogAddress: ANALOG_START_ADDRESS,
   };
+  let currentRack = 1;
+  let currentSlot = 2;
+  let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
+  let hwModules: { [moduleType: string]: HWModule[] } = {
+    diModules: [],
+    doModules: [],
+    aiModules: [],
+    aoModules: [],
+  };
+  let openDiModule: DI_6DL11316GF000PK0 = new DI_6DL11316GF000PK0();
+  let openDoModule: DO_6DL11326BH000PH1 = new DO_6DL11326BH000PH1();
+  let openAiModule: AI_6DL11346TH000PH1 = new AI_6DL11346TH000PH1();
+  let openAoModule: AO_6DL11356TF000PH1 = new AO_6DL11356TF000PH1();
 
-  for (let row = 1; row < data.length; row++) {
-    let tagName: string = data[row][0];
-    let description: string = data[row][4];
-    let channelType: string = data[row][5];
-    let assignSuccess: boolean = false;
+  for (let r = 0; r < dfArray.length; r++) {
+    let tagName: string = dfArray[r]["Tagnames"];
+    let description: string = dfArray[r]["Comment"];
+    let channelType: string = dfArray[r]["Type"];
+    console.log(tagName, description, channelType);
 
     if (description === "undefined" || typeof description === "undefined")
       description = "";
 
     let channelIsSpare = false;
     if (tagName.toUpperCase().includes("SPARE")) channelIsSpare = true;
+
+    if (channelType === "DI") {
+      if (
+        hwModules["diModules"].length <= 0 ||
+        openDiModule.nextOpenChannel < 0
+      ) {
+        openDiModule = new DI_6DL11316GF000PK0();
+        hwModules["diModules"].push(openDiModule);
+      }
+      openDiModule.assignChannel(
+        openDiModule.nextOpenChannel,
+        0,
+        0,
+        tagName,
+        description,
+        channelIsSpare
+      );
+    }
+    if (channelType === "DO") {
+      if (
+        hwModules["doModules"].length <= 0 ||
+        openDoModule.nextOpenChannel < 0
+      ) {
+        openDoModule = new DO_6DL11326BH000PH1();
+        hwModules["doModules"].push(openDoModule);
+      }
+      openDoModule.assignChannel(
+        openDoModule.nextOpenChannel,
+        0,
+        0,
+        tagName,
+        description,
+        channelIsSpare
+      );
+    }
+    if (channelType === "AI") {
+      if (
+        hwModules["aiModules"].length <= 0 ||
+        openAiModule.nextOpenChannel < 0
+      ) {
+        openAiModule = new AI_6DL11346TH000PH1();
+        hwModules["aiModules"].push(openAiModule);
+      }
+      openAiModule.assignChannel(
+        openAiModule.nextOpenChannel,
+        0,
+        0,
+        tagName,
+        description,
+        channelIsSpare
+      );
+    }
+    if (channelType === "AO") {
+      if (
+        hwModules["aoModules"].length <= 0 ||
+        openAoModule.nextOpenChannel < 0
+      ) {
+        openAoModule = new AO_6DL11356TF000PH1();
+        hwModules["aoModules"].push(openAoModule);
+      }
+      openAoModule.assignChannel(
+        openAoModule.nextOpenChannel,
+        0,
+        0,
+        tagName,
+        description,
+        channelIsSpare
+      );
+    }
+
+    let previousModuleType = "";
+    for (let [key, moduleList] of Object.entries(hwModules)) {
+      for (let i = 0; i < moduleList.length; i++) {
+        if (!(currentRack in hardwareRacks)) {
+          hardwareRacks[currentRack] = {};
+        }
+        moduleList[i].rack = currentRack;
+        moduleList[i].slot = currentSlot;
+        if (moduleList[i].type === "DI" || moduleList[i].type === "DO") {
+          moduleList[i].startAddress = addressLookup["nextDigitalAddress"];
+          addressLookup["nextDigitalAddress"] =
+            moduleList[i].nextStartAddress();
+        }
+        if (moduleList[i].type === "AI" || moduleList[i].type === "AO") {
+          moduleList[i].startAddress = addressLookup["nextAnalogAddress"];
+          addressLookup["nextAnalogAddress"] = moduleList[i].nextStartAddress();
+        }
+        hardwareRacks[currentRack][currentSlot] = moduleList[i];
+
+        if (
+          groupIoModuleTypes &&
+          (moduleList[i].type !== previousModuleType ||
+            previousModuleType !== "")
+        ) {
+          currentRack++;
+        } else {
+          if (currentSlot > 39) currentRack++;
+        }
+      }
+    }
   }
 
-  return {};
+  return hardwareRacks;
 }

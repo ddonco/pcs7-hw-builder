@@ -1,8 +1,7 @@
 import { app, ipcMain, webContents } from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
-import "./utils/parser";
-import { parseAssignedIO } from "./utils/parser";
+import { parseAssignedIO, parseRawIO } from "./utils/parser";
 import { buildHW } from "./utils/builder";
 
 let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
@@ -84,7 +83,8 @@ app.on("web-contents-created", (event, webContents) => {
 
   ipcMain.on("toMain", (event, args) => {
     console.log(args);
-    const filePath = "e:/dev/electron/Sample_IO_List.xlsx";
+    // const filePath = "e:/dev/electron/Sample_IO_List.xlsx";
+    const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
     if (args === "parse IO") {
       let groupIOAddresses = true;
       let userAddressParams = {
@@ -105,16 +105,17 @@ app.on("web-contents-created", (event, webContents) => {
 
       webContents.send("fromMain", "parse started");
 
-      [hardwareRacks, hardwareInfo] = parseAssignedIO(filePath);
+      // [hardwareRacks, hardwareInfo] = parseAssignedIO(filePath);
+      hardwareRacks = parseRawIO(filePath);
 
       webContents.send("fromMain", "parse complete");
-      console.log("HW INFO:", hardwareInfo);
-      sortedRacks = buildHW(
-        hardwareRacks,
-        hardwareInfo,
-        userAddressParams,
-        groupIOAddresses
-      );
+      // console.log("HW INFO:", hardwareInfo);
+      // sortedRacks = buildHW(
+      //   hardwareRacks,
+      //   hardwareInfo,
+      //   userAddressParams,
+      //   groupIOAddresses
+      // );
     }
   });
 });

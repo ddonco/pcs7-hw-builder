@@ -18,6 +18,13 @@ const config = {
       '/@/': join(PACKAGE_ROOT, 'src') + '/',
     },
   },
+  optimizeDeps: {
+    exclude: [
+      'mock-aws-s3',
+      'aws-sdk',
+      'nock'
+    ]
+  },
   build: {
     sourcemap: 'inline',
     target: `node${node}`,
