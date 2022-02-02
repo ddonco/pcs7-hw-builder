@@ -106,7 +106,7 @@ app.on("web-contents-created", (event, webContents) => {
       webContents.send("fromMain", "parse started");
 
       // [hardwareRacks, hardwareInfo] = parseAssignedIO(filePath);
-      hardwareRacks = parseRawIO(filePath);
+      hardwareRacks = parseRawIO(filePath, true);
 
       webContents.send("fromMain", "parse complete");
       // console.log("HW INFO:", hardwareInfo);

@@ -37,7 +37,7 @@ export class HWModule {
   totalOutBytes: number = 2;
   revision: string = "V1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 0;
+  nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -51,11 +51,11 @@ export class HWModule {
     spare: boolean = false
   ): boolean {
     // Check if rack and slot assignments for the channel match this modules rack and slot assignments
-    if (rack !== this.rack && slot !== this.slot) {
+    if (rack !== this.rack || slot !== this.slot) {
       // Rack or slot mismatch, channel not assigned
       childLogger.error("rack or slot mismatch, channel not assigned", {
-        rack: rack,
-        slot: slot,
+        rack: { module: this.rack, assignment: rack },
+        slot: { module: this.slot, assignment: slot },
         channel: channelNumber,
         tag: tagName,
       });
@@ -89,6 +89,15 @@ export class HWModule {
     let nextOutAddress = this.startAddress + this.totalOutBytes;
     return nextInAddress > nextOutAddress ? nextInAddress : nextOutAddress;
   }
+
+  updateChannelAddresses() {
+    for (let i = 0; i < this.channels.length; i++) {
+      this.channels[i].address = (
+        this.startAddress +
+        this.bytesPerChannel * i
+      ).toFixed(1);
+    }
+  }
 }
 
 export class DI_6DL11316GF000PK0 extends HWModule {
@@ -101,12 +110,12 @@ export class DI_6DL11316GF000PK0 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "V1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 0;
+  nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
 
-  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -139,12 +148,12 @@ export class DO_6DL11326BH000PH1 extends HWModule {
   totalOutBytes: number = 2;
   revision: string = "V1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 0;
+  nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
 
-  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -179,12 +188,12 @@ export class AI_6DL11346TH000PH1 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "V1.1";
   channels: Channel[] = [];
-  nextOpenChannel: number = 0;
+  nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
 
-  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;
@@ -219,12 +228,12 @@ export class AO_6DL11356TF000PH1 extends HWModule {
   totalOutBytes: number = 16;
   revision: string = "V1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 0;
+  nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
 
-  constructor(startAddress: number = 0, rack: number = 1, slot: number = 2) {
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
     super();
     this.startAddress = startAddress;
     this.rack = rack;

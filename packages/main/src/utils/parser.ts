@@ -1,6 +1,6 @@
 import xlsx from "node-xlsx";
 import { DataFrame } from "data-forge";
-const fs = require("fs");
+import * as fs from "fs";
 import {
   DI_6DL11316GF000PK0,
   DO_6DL11326BH000PH1,
@@ -218,9 +218,6 @@ export function parseRawIO(
     nextDigitalAddress: DIGITAL_START_ADDRESS,
     nextAnalogAddress: ANALOG_START_ADDRESS,
   };
-  let currentRack = 1;
-  let currentSlot = 2;
-  let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
   let hwModules: { [moduleType: string]: HWModule[] } = {
     diModules: [],
     doModules: [],
@@ -236,7 +233,7 @@ export function parseRawIO(
     let tagName: string = dfArray[r]["Tagnames"];
     let description: string = dfArray[r]["Comment"];
     let channelType: string = dfArray[r]["Type"];
-    console.log(tagName, description, channelType);
+    // console.log(tagName, description, channelType);
 
     if (description === "undefined" || typeof description === "undefined")
       description = "";
@@ -253,9 +250,9 @@ export function parseRawIO(
         hwModules["diModules"].push(openDiModule);
       }
       openDiModule.assignChannel(
+        0,
+        0,
         openDiModule.nextOpenChannel,
-        0,
-        0,
         tagName,
         description,
         channelIsSpare
@@ -270,15 +267,15 @@ export function parseRawIO(
         hwModules["doModules"].push(openDoModule);
       }
       openDoModule.assignChannel(
+        0,
+        0,
         openDoModule.nextOpenChannel,
-        0,
-        0,
         tagName,
         description,
         channelIsSpare
       );
     }
-    if (channelType === "AI") {
+    if (channelType === "AIHART") {
       if (
         hwModules["aiModules"].length <= 0 ||
         openAiModule.nextOpenChannel < 0
@@ -287,15 +284,15 @@ export function parseRawIO(
         hwModules["aiModules"].push(openAiModule);
       }
       openAiModule.assignChannel(
+        0,
+        0,
         openAiModule.nextOpenChannel,
-        0,
-        0,
         tagName,
         description,
         channelIsSpare
       );
     }
-    if (channelType === "AO") {
+    if (channelType === "AOHART") {
       if (
         hwModules["aoModules"].length <= 0 ||
         openAoModule.nextOpenChannel < 0
@@ -304,46 +301,50 @@ export function parseRawIO(
         hwModules["aoModules"].push(openAoModule);
       }
       openAoModule.assignChannel(
+        0,
+        0,
         openAoModule.nextOpenChannel,
-        0,
-        0,
         tagName,
         description,
         channelIsSpare
       );
     }
+  }
 
-    let previousModuleType = "";
-    for (let [key, moduleList] of Object.entries(hwModules)) {
-      for (let i = 0; i < moduleList.length; i++) {
-        if (!(currentRack in hardwareRacks)) {
-          hardwareRacks[currentRack] = {};
-        }
-        moduleList[i].rack = currentRack;
-        moduleList[i].slot = currentSlot;
-        if (moduleList[i].type === "DI" || moduleList[i].type === "DO") {
-          moduleList[i].startAddress = addressLookup["nextDigitalAddress"];
-          addressLookup["nextDigitalAddress"] =
-            moduleList[i].nextStartAddress();
-        }
-        if (moduleList[i].type === "AI" || moduleList[i].type === "AO") {
-          moduleList[i].startAddress = addressLookup["nextAnalogAddress"];
-          addressLookup["nextAnalogAddress"] = moduleList[i].nextStartAddress();
-        }
-        hardwareRacks[currentRack][currentSlot] = moduleList[i];
-
-        if (
-          groupIoModuleTypes &&
-          (moduleList[i].type !== previousModuleType ||
-            previousModuleType !== "")
-        ) {
-          currentRack++;
-        } else {
-          if (currentSlot > 39) currentRack++;
-        }
+  let currentRack = 1;
+  let currentSlot = 2;
+  let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
+  let previousModuleType = "";
+  for (let [_, moduleList] of Object.entries(hwModules)) {
+    for (let i = 0; i < moduleList.length; i++) {
+      if (!(currentRack in hardwareRacks)) {
+        hardwareRacks[currentRack] = {};
       }
+      if (moduleList[i].type === "DI" || moduleList[i].type === "DO") {
+        moduleList[i].startAddress = addressLookup["nextDigitalAddress"];
+        addressLookup["nextDigitalAddress"] = moduleList[i].nextStartAddress();
+      }
+      if (moduleList[i].type === "AI" || moduleList[i].type === "AO") {
+        moduleList[i].startAddress = addressLookup["nextAnalogAddress"];
+        addressLookup["nextAnalogAddress"] = moduleList[i].nextStartAddress();
+      }
+      moduleList[i].rack = currentRack;
+      moduleList[i].slot = currentSlot;
+      moduleList[i].updateChannelAddresses();
+      hardwareRacks[currentRack][currentSlot] = moduleList[i];
+      currentSlot++;
+      // console.log("Inspect Channels:", moduleList[i].channels);
+
+      if (groupIoModuleTypes && moduleList[i].type !== previousModuleType) {
+        if (previousModuleType !== "") currentRack++;
+      }
+
+      if (currentSlot > 40) currentRack++;
+
+      previousModuleType = moduleList[i].type;
     }
   }
+  console.log("FINAL:", hardwareRacks);
 
   return hardwareRacks;
 }
