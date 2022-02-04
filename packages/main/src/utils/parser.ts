@@ -17,18 +17,18 @@ const DO_MODULE = "DO";
 const AI_MODULE = "AIHART";
 const AO_MODULE = "AOHART";
 const DIGITAL_START_ADDRESS = 0;
-// const DO_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
-// const AO_START_ADDRESS = 0;
 
-export function parseAssignedIO(ioFilePath: string): [
+export function parseAssignedIO(
+  ioFilePath: string,
+  channelZeroStart: boolean = false
+): [
   {
     [rack: string]: { [slot: string]: any };
   },
   { [type: string]: number }
 ] {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
-  // const worksheet = xlsx.parse(ioFilePath)
 
   const data: any = worksheet[0]["data"];
 
@@ -37,9 +37,7 @@ export function parseAssignedIO(ioFilePath: string): [
 
   let addressLookup: { [type: string]: number } = {
     nextDigitalAddress: DIGITAL_START_ADDRESS,
-    // nextDoAddress: DO_START_ADDRESS,
     nextAnalogAddress: ANALOG_START_ADDRESS,
-    // nextAoAddress: AO_START_ADDRESS,
     diCount: 0,
     doCount: 0,
     aiCount: 0,
@@ -58,6 +56,8 @@ export function parseAssignedIO(ioFilePath: string): [
     let description: string = data[row][9];
     let channelType: string = data[row][10];
     let assignSuccess: boolean = false;
+
+    if (channelZeroStart) channel++;
 
     if (description === "undefined" || typeof description === "undefined")
       description = "";
@@ -205,7 +205,7 @@ export function parseRawIO(
 } {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
   const data: any = worksheet[0]["data"];
-  console.log();
+
   let df = new DataFrame({
     columnNames: data[0],
     rows: data.slice(1, data.length),
