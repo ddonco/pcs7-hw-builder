@@ -11,6 +11,7 @@ import { hwBuilderLogger } from "./logger";
 const childLogger = hwBuilderLogger.child({ component: "rack-builder" });
 
 export function buildHW(
+  outFilePath: string,
   hardwareRacks: {
     [rack: string]: { [slot: string]: any };
   },
@@ -27,7 +28,7 @@ export function buildHW(
     addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddress);
   }
 
-  let writeStream = fs.createWriteStream("e:/dev/electron/Sample_Hardware.cfg");
+  let writeStream = fs.createWriteStream(outFilePath);
   let buildString: string;
 
   for (const rack in addressedHW) {
@@ -41,7 +42,7 @@ export function buildHW(
       Object.entries(addressedHW[rack])
     )) {
       if (index === "0" && slot !== "2") {
-        childLogger.error(
+        childLogger.warn(
           "suspected error in slot assignments - Profinet racks typically start with first IO module in slot 2",
           {
             rack: rack,
@@ -152,25 +153,6 @@ function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
   return sortedHW;
 }
 
-// function getStartingAddresses(
-//   hwInfo: { [moduleTyle: string]: number },
-//   userParams: { [moduleTyle: string]: number },
-//   groupIoTypes: boolean = false
-// ): { [moduleTyle: string]: number } {
-//   let startingAddresses = {
-//     diStart: userParams["diStart"],
-//     doStart:
-//       userParams["doStart"] +
-//       (groupIoTypes ? userParams["digitalOffset"] + hwInfo["diTotalBytes"] : 0),
-//     aiStart: userParams["aiStart"],
-//     aoStart:
-//       userParams["aoStart"] +
-//       userParams["analogOffset"] +
-//       hwInfo["aiTotalBytes"],
-//   };
-//   return startingAddresses;
-// }
-
 function getShiftedIoAddresses(
   hardwareRacks: { [rack: string]: { [slot: string]: any } },
   startAddress: { [ioType: string]: number }
@@ -228,9 +210,9 @@ function getGroupedIoAddresses(
     childLogger.error(
       "beginning of do module addressing must come after all address space reserved by di modules",
       {
-        aiStart: startAddress["diStart"],
-        aiTotalBytes: hardwareInfo["diTotalBytes"],
-        aoStart: startAddress["doStart"],
+        diStart: startAddress["diStart"],
+        diTotalBytes: hardwareInfo["diTotalBytes"],
+        doStart: startAddress["doStart"],
       }
     );
   }

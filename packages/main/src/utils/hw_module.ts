@@ -138,6 +138,44 @@ export class DI_6DL11316GF000PK0 extends HWModule {
   }
 }
 
+export class DI_6DL11316BH000PH1 extends HWModule {
+  partNumber: string = "6DL1 131-6BH00-0PH1";
+  description: string = "DI8 x 24VDC HA";
+  type: string = "DI";
+  channelCount: number = 16;
+  bytesPerChannel: number = 0.1;
+  totalInBytes: number = 4;
+  totalOutBytes: number = 0;
+  revision: string = "V1.0";
+  channels: Channel[] = [];
+  nextOpenChannel: number = 1; // Channel count starts at 1
+  startAddress: number = 0;
+  rack: number = 0;
+  slot: number = 0;
+
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
+    super();
+    this.startAddress = startAddress;
+    this.rack = rack;
+    this.slot = slot;
+
+    for (let i = 1; i <= this.channelCount; i++) {
+      this.channels.push(
+        new Channel(
+          i,
+          (this.startAddress + i * this.bytesPerChannel).toFixed(1),
+          this.type,
+          `SPARE_R${("00" + this.rack).slice(-2)}S${("00" + this.slot).slice(
+            -2
+          )}C${("00" + i).slice(-2)}`,
+          "",
+          true
+        )
+      );
+    }
+  }
+}
+
 export class DO_6DL11326BH000PH1 extends HWModule {
   partNumber: string = "6DL1 132-6BH00-0PH1";
   description: string = "DQ16 x 24VDC/0.5A HA";

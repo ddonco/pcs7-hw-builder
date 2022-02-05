@@ -1,8 +1,10 @@
+import { channel } from "diagnostics_channel";
 import { Channel } from "./hw_module";
 import {
   buildAIDiagnostics,
   buildAODiagnostics,
-  buildDIDiagnostics,
+  buildDI8Diagnostics,
+  buildDI16Diagnostics,
   buildDODiagnostics,
 } from "./profinet_diagnostics";
 
@@ -112,7 +114,14 @@ export function buildDIConfig(
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, 0, 0, 16\n`;
   let symbols = buildSymbols("DI", channels);
-  let diagnostics = buildDIDiagnostics(channels);
+
+  let diagnostics: string;
+  if (channels.length == 8) {
+    diagnostics = buildDI8Diagnostics(channels);
+  } else {
+    diagnostics = buildDI16Diagnostics(channels);
+  }
+
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   return begin + symbols + diagnostics + end;

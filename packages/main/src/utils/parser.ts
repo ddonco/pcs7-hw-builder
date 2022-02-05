@@ -2,7 +2,7 @@ import xlsx from "node-xlsx";
 import { DataFrame } from "data-forge";
 import * as fs from "fs";
 import {
-  DI_6DL11316GF000PK0,
+  DI_6DL11316BH000PH1,
   DO_6DL11326BH000PH1,
   AI_6DL11346TH000PH1,
   AO_6DL11356TF000PH1,
@@ -14,13 +14,15 @@ const childLogger = hwBuilderLogger.child({ component: "io-parser" });
 
 const DI_MODULE = "DI";
 const DO_MODULE = "DO";
-const AI_MODULE = "AIHART";
-const AO_MODULE = "AOHART";
+const AI_MODULE = "AI";
+const AO_MODULE = "AO";
 const DIGITAL_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
 
 export function parseAssignedIO(
   ioFilePath: string,
+  ioColumnNames: { [columnName: string]: string },
+  ioTypeIdentifier: { [ioType: string]: string[] },
   channelZeroStart: boolean = false
 ): [
   {
@@ -29,12 +31,20 @@ export function parseAssignedIO(
   { [type: string]: number }
 ] {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
-
   const data: any = worksheet[0]["data"];
+
+  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  let df = new DataFrame({
+    columnNames: headers,
+    rows: data.slice(1, data.length),
+  });
+
+  df = df.orderBy((row: any) => row[ioColumnNames.channel]);
+  df = df.orderBy((row: any) => row[ioColumnNames.slot]);
+  let dfArray = df.orderBy((row: any) => row[ioColumnNames.rack]).toArray();
 
   let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
   let hwModule: any;
-
   let addressLookup: { [type: string]: number } = {
     nextDigitalAddress: DIGITAL_START_ADDRESS,
     nextAnalogAddress: ANALOG_START_ADDRESS,
@@ -48,13 +58,13 @@ export function parseAssignedIO(
     aoTotalBytes: 0,
   };
 
-  for (let row = 1; row < data.length; row++) {
-    let rack: number = parseInt(data[row][1], 10);
-    let slot: number = parseInt(data[row][2], 10);
-    let channel: number = parseInt(data[row][3], 10);
-    let tagName: string = data[row][5];
-    let description: string = data[row][9];
-    let channelType: string = data[row][10];
+  for (let row = 1; row < dfArray.length; row++) {
+    let rack: number = parseInt(dfArray[row][ioColumnNames.rack], 10);
+    let slot: number = parseInt(dfArray[row][ioColumnNames.slot], 10);
+    let channel: number = parseInt(dfArray[row][ioColumnNames.channel], 10);
+    let tagName: string = dfArray[row][ioColumnNames.tagName];
+    let description: string = dfArray[row][ioColumnNames.description];
+    let channelType: string = dfArray[row][ioColumnNames.ioType];
     let assignSuccess: boolean = false;
 
     if (channelZeroStart) channel++;
@@ -65,28 +75,71 @@ export function parseAssignedIO(
     let channelIsSpare = false;
     if (tagName.toUpperCase().includes("SPARE")) channelIsSpare = true;
 
-    // Check if rack exists in modules object
-    if (rack in hardwareRacks) {
-      // Check if slot exists in rack
-      if (slot in hardwareRacks[rack]) {
-        // Rack and slot exist, so assign channel within module
-        assignSuccess = hardwareRacks[rack][slot].assignChannel(
-          rack,
-          slot,
-          channel,
-          tagName,
-          description,
-          channelIsSpare
-        );
+    if (
+      typeof tagName === "undefined" ||
+      typeof description === "undefined" ||
+      typeof channelType === "undefined" ||
+      typeof rack === "undefined" ||
+      typeof slot === "undefined" ||
+      typeof channel === "undefined" ||
+      typeof channelIsSpare === "undefined"
+    ) {
+      childLogger.error("something is undefined");
+    }
+
+    if (ioTypeIdentifier.di.indexOf(channelType) > -1) {
+      channelType = "DI";
+    } else if (ioTypeIdentifier.do.indexOf(channelType) > -1) {
+      channelType = "DO";
+    } else if (ioTypeIdentifier.ai.indexOf(channelType) > -1) {
+      channelType = "AI";
+    } else if (ioTypeIdentifier.ao.indexOf(channelType) > -1) {
+      channelType = "AO";
+    }
+
+    try {
+      // Check if rack exists in modules object
+      if (rack in hardwareRacks) {
+        // Check if slot exists in rack
+        if (slot in hardwareRacks[rack]) {
+          // Rack and slot exist, so assign channel within module
+          assignSuccess = hardwareRacks[rack][slot].assignChannel(
+            rack,
+            slot,
+            channel,
+            tagName,
+            description,
+            channelIsSpare
+          );
+        } else {
+          // No module (slot) exists for this channel so build module,
+          // add module to rack, and assign channel to module
+          [hwModule, addressLookup] = buildModule(
+            rack,
+            slot,
+            addressLookup,
+            channelType
+          );
+          hardwareRacks[rack][slot] = hwModule;
+          assignSuccess = hardwareRacks[rack][slot].assignChannel(
+            rack,
+            slot,
+            channel,
+            tagName,
+            description,
+            channelIsSpare
+          );
+        }
       } else {
-        // No module (slot) exists for this channel so build module,
-        // add module to rack, and assign channel to module
+        // No rack exists for this channel so build module, add rack for this module,
+        // assign module to slot within rack, and assign channel to module
         [hwModule, addressLookup] = buildModule(
           rack,
           slot,
           addressLookup,
           channelType
         );
+        hardwareRacks[rack] = {};
         hardwareRacks[rack][slot] = hwModule;
         assignSuccess = hardwareRacks[rack][slot].assignChannel(
           rack,
@@ -97,25 +150,12 @@ export function parseAssignedIO(
           channelIsSpare
         );
       }
-    } else {
-      // No rack exists for this channel so build module, add rack for this module,
-      // assign module to slot within rack, and assign channel to module
-      [hwModule, addressLookup] = buildModule(
-        rack,
-        slot,
-        addressLookup,
-        channelType
-      );
-      hardwareRacks[rack] = {};
-      hardwareRacks[rack][slot] = hwModule;
-      assignSuccess = hardwareRacks[rack][slot].assignChannel(
-        rack,
-        slot,
-        channel,
-        tagName,
-        description,
-        channelIsSpare
-      );
+    } catch (error) {
+      childLogger.error(`something is f'ed, row ${row}`, {
+        hw: hardwareRacks[rack][slot],
+        tagName: tagName,
+        channel: channel,
+      });
     }
 
     if (!assignSuccess)
@@ -138,7 +178,7 @@ function buildModule(
   moduleType: string
 ): [any, { [type: string]: number }] {
   if (moduleType === DI_MODULE) {
-    let hwModule = new DI_6DL11316GF000PK0(
+    let hwModule = new DI_6DL11316BH000PH1(
       addressLookup["nextDigitalAddress"],
       rack,
       slot
@@ -224,7 +264,7 @@ export function parseRawIO(
     aiModules: [],
     aoModules: [],
   };
-  let openDiModule: DI_6DL11316GF000PK0 = new DI_6DL11316GF000PK0();
+  let openDiModule: DI_6DL11316BH000PH1 = new DI_6DL11316BH000PH1();
   let openDoModule: DO_6DL11326BH000PH1 = new DO_6DL11326BH000PH1();
   let openAiModule: AI_6DL11346TH000PH1 = new AI_6DL11346TH000PH1();
   let openAoModule: AO_6DL11356TF000PH1 = new AO_6DL11356TF000PH1();
@@ -241,12 +281,12 @@ export function parseRawIO(
     let channelIsSpare = false;
     if (tagName.toUpperCase().includes("SPARE")) channelIsSpare = true;
 
-    if (channelType === "DI") {
+    if (channelType === DI_MODULE) {
       if (
         hwModules["diModules"].length <= 0 ||
         openDiModule.nextOpenChannel < 0
       ) {
-        openDiModule = new DI_6DL11316GF000PK0();
+        openDiModule = new DI_6DL11316BH000PH1();
         hwModules["diModules"].push(openDiModule);
       }
       openDiModule.assignChannel(
@@ -258,7 +298,7 @@ export function parseRawIO(
         channelIsSpare
       );
     }
-    if (channelType === "DO") {
+    if (channelType === DO_MODULE) {
       if (
         hwModules["doModules"].length <= 0 ||
         openDoModule.nextOpenChannel < 0
@@ -275,7 +315,7 @@ export function parseRawIO(
         channelIsSpare
       );
     }
-    if (channelType === "AIHART") {
+    if (channelType === AI_MODULE) {
       if (
         hwModules["aiModules"].length <= 0 ||
         openAiModule.nextOpenChannel < 0
@@ -292,7 +332,7 @@ export function parseRawIO(
         channelIsSpare
       );
     }
-    if (channelType === "AOHART") {
+    if (channelType === AO_MODULE) {
       if (
         hwModules["aoModules"].length <= 0 ||
         openAoModule.nextOpenChannel < 0

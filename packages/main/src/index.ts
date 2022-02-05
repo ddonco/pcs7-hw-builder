@@ -83,9 +83,26 @@ app.on("web-contents-created", (event, webContents) => {
 
   ipcMain.on("toMain", (event, args) => {
     console.log(args);
-    // const filePath = "e:/dev/electron/Sample_IO_List.xlsx";
-    const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
+    const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
+    // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
+    const outFilePath = "e:/dev/electron/GPCC_HWConfig.xlsx";
+
     if (args === "parse IO") {
+      let ioColumnNames = {
+        tagName: "TagID",
+        description: "Service",
+        rack: "Rack",
+        slot: "Card",
+        channel: "Channel",
+        ioType: "I/O Type",
+      };
+      let ioTypeIdentifier = {
+        di: ["DI DRY CONTACT"],
+        do: ["DO HIGH SIDE"],
+        ai: ["AI2", "AI4"],
+        ao: ["AO"],
+      };
+
       let groupIOAddresses = true;
       let userAddressParams = {
         diStart: 0,
@@ -97,25 +114,31 @@ app.on("web-contents-created", (event, webContents) => {
       if (groupIOAddresses) {
         userAddressParams = {
           diStart: 0,
-          doStart: 14,
+          doStart: 132,
           aiStart: 512,
-          aoStart: 954,
+          aoStart: 1012,
         };
       }
 
       webContents.send("fromMain", "parse started");
 
-      // [hardwareRacks, hardwareInfo] = parseAssignedIO(filePath);
-      hardwareRacks = parseRawIO(filePath, true);
+      [hardwareRacks, hardwareInfo] = parseAssignedIO(
+        ioFilePath,
+        ioColumnNames,
+        ioTypeIdentifier,
+        true
+      );
+      // hardwareRacks = parseRawIO(filePath, true);
 
       webContents.send("fromMain", "parse complete");
-      // console.log("HW INFO:", hardwareInfo);
-      // sortedRacks = buildHW(
-      //   hardwareRacks,
-      //   hardwareInfo,
-      //   userAddressParams,
-      //   groupIOAddresses
-      // );
+
+      sortedRacks = buildHW(
+        outFilePath,
+        hardwareRacks,
+        hardwareInfo,
+        userAddressParams,
+        groupIOAddresses
+      );
     }
   });
 });
