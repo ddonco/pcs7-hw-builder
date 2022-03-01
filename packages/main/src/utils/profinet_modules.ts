@@ -51,7 +51,11 @@ export function buildAIConfig(
   hartModuleType: string,
   channels: Channel[]
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${rackNumber}, SLOT ${slotNumber}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
+  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+    -2
+  )}, SLOT ${("00" + slotNumber).slice(
+    -2
+  )}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, 0, 0, 32\n`;
@@ -81,7 +85,11 @@ export function buildAOConfig(
   hartModuleType: string,
   channels: Channel[]
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${rackNumber}, SLOT ${slotNumber}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
+  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+    -2
+  )}, SLOT ${("00" + slotNumber).slice(
+    -2
+  )}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, 0, 0, 32
@@ -90,7 +98,7 @@ export function buildAOConfig(
   let symbols = buildSymbols("AO", channels);
   let diagnostics = buildAODiagnostics(channels);
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
-    END\n`;
+  END\n`;
   let hartModules = buildHartConfig(
     rackNumber,
     slotNumber,
@@ -109,7 +117,9 @@ export function buildDIConfig(
   moduleBytesSize: number,
   channels: Channel[]
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${rackNumber}, SLOT ${slotNumber}, "${modulePartNo}", "${moduleName}"
+  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+    -2
+  )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, 0, 0, 16\n`;
@@ -138,7 +148,9 @@ export function buildDOConfig(
   moduleOutBytesSize: number,
   channels: Channel[]
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${rackNumber}, SLOT ${slotNumber}, "${modulePartNo}", "${moduleName}"
+  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+    -2
+  )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, 0, 0, 16
@@ -147,6 +159,6 @@ export function buildDOConfig(
   let symbols = buildSymbols("DO", channels);
   let diagnostics = buildDODiagnostics(channels);
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
-    END\n`;
+  END\n`;
   return begin + symbols + diagnostics + end;
 }

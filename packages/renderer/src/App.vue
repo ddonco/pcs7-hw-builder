@@ -1,23 +1,28 @@
 <script lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import NavSideBar from "./components/NavSideBar.vue";
+import ProjectTitle from "./components/ProjectTitle.vue";
 
 export default {
   name: "App",
   components: {
-    HelloWorld
+    NavSideBar,
+    ProjectTitle,
   },
-  mounted() {
-    (this as any).$nextTick(function() {
-      window.api.receive("fromMain", (data:any) => {
-        console.log(`Received ${data} from main process`);
-      });
-      window.api.send("toMain", "parse IO");
-    })
-  },
-}
+};
 </script>
 
 <template>
-  <img alt="Vue logo" src="../assets/logo.svg" width="150" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+  <div class="h-screen w-screen flex bg-gray-200 border-2">
+    <!-- container -->
+    <NavSideBar />
+    <div class="flex flex-col w-full">
+      <div class="flex flex-row h-min">
+        <ProjectTitle />
+      </div>
+      <div class="flex flex-row h-full">
+        <!-- content area -->
+        <router-view />
+      </div>
+    </div>
+  </div>
 </template>

@@ -16,7 +16,7 @@ export function buildAIDiagnostics(channels: Channel[]): string {
   NUMBER_OF_FOLLOWING_CHANNEL_PARAMETER_BLOCKS, "16"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "14"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
-  const staticEndString = `MEASURING_RANGE, AI , 0, "4_TO_20_MA_HART"
+  const staticEndString = `  MEASURING_RANGE, AI , 0, "4_TO_20_MA_HART"
   MEASURING_RANGE, AI , 1, "4_TO_20_MA_HART"
   MEASURING_RANGE, AI , 2, "4_TO_20_MA_HART"
   MEASURING_RANGE, AI , 3, "4_TO_20_MA_HART"
@@ -339,8 +339,8 @@ export function buildAIDiagnostics(channels: Channel[]): string {
 
   let dynamicString = "";
   channels.forEach((channel, index) => {
-    dynamicString += `MEASURING_TYPE, AI , ${index}, "${
-      channel.spare ? "Deactivated" : "CURRENT_(2-WIRE_TRANSDUCER)"
+    dynamicString += `  MEASURING_TYPE, AI , ${index}, "${
+      channel.spare ? "DEACTIVATED" : "CURRENT_(2-WIRE_TRANSDUCER)"
     }"\n`;
   });
 
@@ -362,14 +362,7 @@ export function buildAODiagnostics(channels: Channel[]): string {
   NUMBER_OF_FOLLOWING_CHANNEL_PARAMETER_BLOCKS, "8"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "8"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
-  const staticEndString = `OUTPUT_RANGE, AO , 0, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 1, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 2, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 3, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 4, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 5, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 6, "4_TO_20_MA_HART"
-  OUTPUT_RANGE, AO , 7, "4_TO_20_MA_HART"
+  const staticEndString = `
   DIAGNOSTICS_SHORT_CIRCUIT, AO , 0, "1"
   DIAGNOSTICS_SHORT_CIRCUIT, AO , 1, "1"
   DIAGNOSTICS_SHORT_CIRCUIT, AO , 2, "1"
@@ -453,8 +446,13 @@ export function buildAODiagnostics(channels: Channel[]): string {
 
   let dynamicString = "";
   channels.forEach((channel, index) => {
-    dynamicString += `TYPE_OF_OUTPUT, AO , ${index}, "${
-      channel.spare ? "Deactivated" : "CURRENT"
+    dynamicString += `  TYPE_OF_OUTPUT, AO , ${index}, "${
+      channel.spare ? "DEACTIVATED" : "CURRENT"
+    }"\n`;
+  });
+  channels.forEach((channel, index) => {
+    dynamicString += `  OUTPUT_RANGE, AO , ${index}, "${
+      channel.spare ? "NONE" : "4_TO_20_MA_HART"
     }"\n`;
   });
 
@@ -516,7 +514,7 @@ export function buildDI8Diagnostics(channels: Channel[]): string {
 
   let dynamicString = "";
   channels.forEach((channel, index) => {
-    dynamicString += `CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
+    dynamicString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
       !channel.spare)}"\n`;
   });
 
@@ -654,7 +652,7 @@ export function buildDI16Diagnostics(channels: Channel[]): string {
 
   let dynamicString = "";
   channels.forEach((channel, index) => {
-    dynamicString += `CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
+    dynamicString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
       !channel.spare)}"\n`;
   });
 
@@ -742,7 +740,7 @@ export function buildDODiagnostics(channels: Channel[]): string {
   DIAGNOSTICS_WIRE_BREAK, DO , 14, "1"
   DIAGNOSTICS_WIRE_BREAK, DO , 15, "1"\n`;
 
-  const staticEndString = `REACTION_TO_CPU_STOP, DO , 0, "TURN_OFF"
+  const staticEndString = `  REACTION_TO_CPU_STOP, DO , 0, "TURN_OFF"
   REACTION_TO_CPU_STOP, DO , 1, "TURN_OFF"
   REACTION_TO_CPU_STOP, DO , 2, "TURN_OFF"
   REACTION_TO_CPU_STOP, DO , 3, "TURN_OFF"
@@ -777,7 +775,7 @@ export function buildDODiagnostics(channels: Channel[]): string {
 
   let dynamicString = "";
   channels.forEach((channel, index) => {
-    dynamicString += `CHANNEL_ACTIVATED, DO , ${index}, "${+(channel.spare =
+    dynamicString += `  CHANNEL_ACTIVATED, DO , ${index}, "${+(channel.spare =
       !channel.spare)}"\n`;
   });
 

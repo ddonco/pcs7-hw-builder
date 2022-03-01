@@ -35,7 +35,7 @@ export class HWModule {
   bytesPerChannel: number = 0.1;
   totalInBytes: number = 2;
   totalOutBytes: number = 2;
-  revision: string = "V1.0";
+  revision: string = "1.0";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
@@ -108,7 +108,7 @@ export class DI_6DL11316GF000PK0 extends HWModule {
   bytesPerChannel: number = 0.1;
   totalInBytes: number = 2;
   totalOutBytes: number = 0;
-  revision: string = "V1.0";
+  revision: string = "1.0";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
@@ -146,7 +146,7 @@ export class DI_6DL11316BH000PH1 extends HWModule {
   bytesPerChannel: number = 0.1;
   totalInBytes: number = 4;
   totalOutBytes: number = 0;
-  revision: string = "V1.0";
+  revision: string = "1.0";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
@@ -184,7 +184,7 @@ export class DO_6DL11326BH000PH1 extends HWModule {
   bytesPerChannel: number = 0.1;
   totalInBytes: number = 2;
   totalOutBytes: number = 2;
-  revision: string = "V1.0";
+  revision: string = "1.0";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
@@ -224,7 +224,7 @@ export class AI_6DL11346TH000PH1 extends HWModule {
   bytesPerChannel: number = 2;
   totalInBytes: number = 34;
   totalOutBytes: number = 0;
-  revision: string = "V1.1";
+  revision: string = "1.1";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;
@@ -264,7 +264,7 @@ export class AO_6DL11356TF000PH1 extends HWModule {
   bytesPerChannel: number = 2;
   totalInBytes: number = 1;
   totalOutBytes: number = 16;
-  revision: string = "V1.0";
+  revision: string = "1.0";
   channels: Channel[] = [];
   nextOpenChannel: number = 1; // Channel count starts at 1
   startAddress: number = 0;

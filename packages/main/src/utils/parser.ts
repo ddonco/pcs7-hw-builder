@@ -19,6 +19,14 @@ const AO_MODULE = "AO";
 const DIGITAL_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
 
+export function parseColumnNames(ioFilePath: string): string[] {
+  const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
+  const data: any = worksheet[0]["data"];
+
+  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  return headers;
+}
+
 export function parseAssignedIO(
   ioFilePath: string,
   ioColumnNames: { [columnName: string]: string },
@@ -84,7 +92,18 @@ export function parseAssignedIO(
       typeof channel === "undefined" ||
       typeof channelIsSpare === "undefined"
     ) {
-      childLogger.error("something is undefined");
+      childLogger.error(
+        `a required column has been found with undefined value, this tag has been skipped`,
+        {
+          tagName: String(tagName),
+          description: String(description),
+          channelType: String(channelType),
+          rack: String(rack),
+          slot: String(slot),
+          channel: String(channel),
+        }
+      );
+      continue;
     }
 
     if (ioTypeIdentifier.di.indexOf(channelType) > -1) {
@@ -151,7 +170,7 @@ export function parseAssignedIO(
         );
       }
     } catch (error) {
-      childLogger.error(`something is f'ed, row ${row}`, {
+      childLogger.error(`build module failed, row ${row}`, {
         hw: hardwareRacks[rack][slot],
         tagName: tagName,
         channel: channel,

@@ -1,12 +1,23 @@
 import { app, ipcMain, webContents } from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
-import { parseAssignedIO, parseRawIO } from "./utils/parser";
+import { parseAssignedIO, parseColumnNames, parseRawIO } from "./utils/parser";
 import { buildHW } from "./utils/builder";
 
 let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
 let sortedRacks: { [rack: string]: { [slot: string]: any } } = {};
 let hardwareInfo: { [type: string]: number } = {};
+let ioFilePath: string = "";
+let parsedColumnNames: string[] = [];
+let ioColumnNames: { [col: string]: string } = {};
+let args: { [prop: string]: any } = {};
+let groupIOAddresses = true;
+let userAddressParams = {
+  diStart: 0,
+  doStart: 0,
+  aiStart: 512,
+  aoStart: 512,
+};
 
 /**
  * Prevent multiple instances
@@ -83,22 +94,52 @@ app.on("web-contents-created", (event, webContents) => {
 
   ipcMain.on("toMain", (event, args) => {
     console.log(args);
-    const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
+
+    let ioTypeIdentifier = {
+      di: ["DI Dry Contact"],
+      do: ["DO High Side"],
+      ai: ["AI2", "AI4"],
+      ao: ["AO"],
+    };
+    ioColumnNames = {
+      tagName: "TagID",
+      description: "Service",
+      rack: "Rack",
+      slot: "PCS7 Slot",
+      channel: "Chn",
+      ioType: "I/O Type",
+    };
+
+    if ("assignedIoFilePath" in args) {
+      ioFilePath = args["assignedIoFilePath"];
+      parsedColumnNames = parseColumnNames(ioFilePath);
+      console.log(`Column Names: ${parseColumnNames}`);
+    }
+
+    if ("parseIoFilePath" in args) {
+      [hardwareRacks, hardwareInfo] = parseAssignedIO(
+        ioFilePath,
+        ioColumnNames,
+        ioTypeIdentifier,
+        true
+      );
+    }
+    // const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
     // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
-    const outFilePath = "e:/dev/electron/GPCC_HWConfig.xlsx";
+    const outFilePath = "e:/dev/electron/GPCC_HWConfig.cfg";
 
     if (args === "parse IO") {
       let ioColumnNames = {
         tagName: "TagID",
         description: "Service",
         rack: "Rack",
-        slot: "Card",
-        channel: "Channel",
+        slot: "PCS7 Slot",
+        channel: "Chn",
         ioType: "I/O Type",
       };
       let ioTypeIdentifier = {
-        di: ["DI DRY CONTACT"],
-        do: ["DO HIGH SIDE"],
+        di: ["DI Dry Contact"],
+        do: ["DO High Side"],
         ai: ["AI2", "AI4"],
         ao: ["AO"],
       };
@@ -116,29 +157,32 @@ app.on("web-contents-created", (event, webContents) => {
           diStart: 0,
           doStart: 132,
           aiStart: 512,
-          aoStart: 1012,
+          aoStart: 1022,
         };
       }
 
-      webContents.send("fromMain", "parse started");
+      // webContents.send("fromMain", "parse started");
 
-      [hardwareRacks, hardwareInfo] = parseAssignedIO(
-        ioFilePath,
-        ioColumnNames,
-        ioTypeIdentifier,
-        true
-      );
-      // hardwareRacks = parseRawIO(filePath, true);
+      // let hardwareInfo = {};
+      // [hardwareRacks, hardwareInfo] = parseAssignedIO(
+      //   ioFilePath,
+      //   ioColumnNames,
+      //   ioTypeIdentifier,
+      //   true
+      // );
+      // // hardwareRacks = parseRawIO(filePath, true);
 
-      webContents.send("fromMain", "parse complete");
+      // if (Object.keys(hardwareInfo).length > 0) console.log(hardwareInfo);
 
-      sortedRacks = buildHW(
-        outFilePath,
-        hardwareRacks,
-        hardwareInfo,
-        userAddressParams,
-        groupIOAddresses
-      );
+      // webContents.send("fromMain", "parse complete");
+
+      // sortedRacks = buildHW(
+      //   outFilePath,
+      //   hardwareRacks,
+      //   hardwareInfo,
+      //   userAddressParams,
+      //   groupIOAddresses
+      // );
     }
   });
 });
