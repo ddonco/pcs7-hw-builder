@@ -19,7 +19,7 @@ const AO_MODULE = "AO";
 const DIGITAL_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
 
-export function parseColumnNames(ioFilePath: string): string[] {
+export function parseHeaders(ioFilePath: string): string[] {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
   const data: any = worksheet[0]["data"];
 

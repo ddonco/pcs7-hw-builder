@@ -3,6 +3,7 @@ import { defineComponent } from "vue";
 import ColumnNameConfig from "/@/components/ColumnNameConfig.vue";
 import IOTypeIdentifier from "/@/components/IOTypeIdentifier.vue";
 import IOAddressStart from "../components/IOAddressStart.vue";
+import { useStore } from "/@/store/index";
 
 export default defineComponent({
   name: "BuildHW",
@@ -11,11 +12,51 @@ export default defineComponent({
     IOTypeIdentifier,
     IOAddressStart,
   },
+  setup() {
+    const store = useStore();
+
+    const setIoFilePath = (event: any, filePath: string) => {
+      store.dispatch("setFilePath", filePath);
+    };
+
+    const parseHeaders = (event: any) => {
+      if (store.state.ioFilePath) {
+        window.api.send("toMain", {
+          assignedIoFilePath: store.state.ioFilePath,
+        });
+        window.api.receive("fromMain", (data: any) => {
+          store.dispatch("setHeaders", data.parsedHeaders);
+          console.log(`Received "${data.parsedHeaders}"`);
+        });
+      }
+    };
+    return {
+      setIoFilePath,
+      parseHeaders,
+      ioFilePath: "",
+    };
+  },
   methods: {
     filePathChange: function (event: any) {
       let filePath = event.target.files[0].path;
-      window.api.send("toMain", { assignedIoFilePath: filePath });
+      if (filePath) {
+        this.ioFilePath = filePath;
+        this.setIoFilePath(event, filePath);
+      }
     },
+    clearInput: function (event: any) {
+      (this.$refs["ioFilePath"] as HTMLInputElement).value = "";
+    },
+    // parseHeaders: function (event: any) {
+    //   if (this.ioFilePath) {
+    //     const store = useStore();
+    //     window.api.send("toMain", { assignedIoFilePath: this.ioFilePath });
+    //     window.api.receive("fromMain", (data: any) => {
+    //       store.commit("setHeaders", data.parsedHeaders);
+    //       // console.log(`Received "${this.headers}" from main process`);
+    //     });
+    //   }
+    // },
     parseIoClick: function (event: any) {
       window.api.send("toMain", { parseIoFilePath: true });
     },
@@ -23,28 +64,29 @@ export default defineComponent({
       console.log(event.target.checked);
     },
   },
-  // mounted() {
-  //   this.$nextTick(function () {
-  //     window.api.receive("fromMain", (data: any) => {
-  //       console.log(`Received "${data}" from main process`);
-  //     });
-  //     window.api.send("toMain", "right back at cha");
-  //   });
-  // },
 });
 </script>
 
 <template>
   <div class="px-2 w-full">
-    <div class="flex flex-row pt-2 items-center cursor-default">
-      <div class="w-52 font-semibold">I/O Assignment List:</div>
+    <div class="flex flex-row pt-2 cursor-default">
+      <div class="w-38 h-min font-semibold">I/O Assignment List:</div>
       <input
-        class="block w-full text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+        once
+        class="block w-100 h-min text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
         aria-describedby="file_path_help"
         id="file_path"
+        ref="ioFilePath"
         type="file"
+        v-on:click="clearInput"
         v-on:change="filePathChange"
       />
+      <button
+        class="h-min mx-2 px-2 text-sm text-gray-900 bg-white rounded border border-gray-400 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+        v-on:click="parseHeaders"
+      >
+        Parse Headers
+      </button>
     </div>
     <div class="flex flex-row pt-4">
       <div class="w-full divide-y divide-gray-500 cursor-default font-semibold">

@@ -1,14 +1,14 @@
 import { app, ipcMain, webContents } from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
-import { parseAssignedIO, parseColumnNames, parseRawIO } from "./utils/parser";
+import { parseAssignedIO, parseHeaders, parseRawIO } from "./utils/parser";
 import { buildHW } from "./utils/builder";
 
 let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
 let sortedRacks: { [rack: string]: { [slot: string]: any } } = {};
 let hardwareInfo: { [type: string]: number } = {};
 let ioFilePath: string = "";
-let parsedColumnNames: string[] = [];
+let parsedHeaders: string[] = [];
 let ioColumnNames: { [col: string]: string } = {};
 let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
@@ -86,13 +86,6 @@ if (import.meta.env.PROD) {
 
 app.on("web-contents-created", (event, webContents) => {
   ipcMain.on("toMain", (event, args) => {
-    webContents.on("did-finish-load", () => {
-      console.log(args);
-      webContents.send("fromMain", "for the love of god");
-    });
-  });
-
-  ipcMain.on("toMain", (event, args) => {
     console.log(args);
 
     let ioTypeIdentifier = {
@@ -111,9 +104,14 @@ app.on("web-contents-created", (event, webContents) => {
     };
 
     if ("assignedIoFilePath" in args) {
-      ioFilePath = args["assignedIoFilePath"];
-      parsedColumnNames = parseColumnNames(ioFilePath);
-      console.log(`Column Names: ${parseColumnNames}`);
+      try {
+        ioFilePath = args["assignedIoFilePath"];
+        parsedHeaders = parseHeaders(ioFilePath);
+        console.log(`Column Names: ${parsedHeaders}`);
+        webContents.send("fromMain", { parsedHeaders: parsedHeaders });
+      } catch (e) {
+        console.log(`parse headers error: ${e}`);
+      }
     }
 
     if ("parseIoFilePath" in args) {

@@ -11,11 +11,6 @@ export default defineComponent({
   components: {
     ColumnNameSelect,
   },
-  data() {
-    return {
-      headers: ["TagID", "Service", "IO Type"],
-    };
-  },
 });
 </script>
 
@@ -25,7 +20,7 @@ export default defineComponent({
       <h3>{{ columnName }}</h3>
     </div>
     <div class="flex-row">
-      <ColumnNameSelect :columnId="columnId" :columnHeaders="headers" />
+      <ColumnNameSelect :columnId="columnId" />
     </div>
   </div>
 </template>

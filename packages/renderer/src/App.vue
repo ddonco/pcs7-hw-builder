@@ -8,6 +8,14 @@ export default {
     NavSideBar,
     ProjectTitle,
   },
+  // mounted() {
+  //   this.$nextTick(function () {
+  //     window.api.receive("fromMain", (data: any) => {
+  //       console.log(`Received "${data}" from main process`);
+  //     });
+  //     window.api.send("toMain", "right back at cha");
+  //   });
+  // },
 };
 </script>
 

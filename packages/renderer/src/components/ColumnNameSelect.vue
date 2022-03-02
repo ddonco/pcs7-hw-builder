@@ -6,7 +6,6 @@ export default defineComponent({
   name: "ColumnNameSelect",
   props: {
     columnId: String,
-    columnHeaders: Array
   },
   setup() {
     const store = useStore()
@@ -15,21 +14,24 @@ export default defineComponent({
       let columnHeader = headers[nameIndex]
       store.dispatch("assignColumnHeader", [column, columnHeader])
     }
-
     return {
       selectedColumnChange,
     }
   },
-  methods: {
+  computed: {
+    headers: function() {
+      const store = useStore()
+      return store.state.headers
+    }
   },
 })
 </script>
 
 <template>
   <select class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded focus:ring-blue-500 focus:border-blue-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-    v-on:change="selectedColumnChange($event, columnId, columnHeaders)">
+    v-on:change="selectedColumnChange($event, columnId, headers)">
     <option disabled selected class="text-gray-300">--select--</option>
-    <option v-for="(col, index) in columnHeaders" :key="index">
+    <option v-for="(col, index) in headers" :key="index">
       <option class="text-center">{{col}}</option>
     </option>
   </select>
