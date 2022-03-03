@@ -12,6 +12,12 @@ export interface State {
     ioType: string;
   };
   headers: string[];
+  ioTypeIdentifiers: {
+    di: string[];
+    do: string[];
+    ai: string[];
+    ao: string[];
+  };
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -28,6 +34,12 @@ export const store = createStore<State>({
       ioType: "",
     },
     headers: [],
+    ioTypeIdentifiers: {
+      di: [],
+      do: [],
+      ai: [],
+      ao: [],
+    },
   },
   mutations: {
     SET_FILE_PATH(state, filePath) {
@@ -50,6 +62,20 @@ export const store = createStore<State>({
         state.headers = headers;
       }
     },
+    SET_TYPE_IDENTIFIERS(state, [ioType, identifiers]) {
+      if (ioType === "DI") {
+        state.ioTypeIdentifiers.di = identifiers;
+      }
+      if (ioType === "DO") {
+        state.ioTypeIdentifiers.do = identifiers;
+      }
+      if (ioType === "AI") {
+        state.ioTypeIdentifiers.ai = identifiers;
+      }
+      if (ioType === "AO") {
+        state.ioTypeIdentifiers.ao = identifiers;
+      }
+    },
   },
   actions: {
     setFilePath({ commit }, filePath) {
@@ -59,8 +85,10 @@ export const store = createStore<State>({
       commit("ASSIGN_COLUMN", [column, header]);
     },
     setHeaders({ commit }, headers) {
-      console.log(`commit: ${headers}`);
       commit("SET_HEADERS", headers);
+    },
+    setTypeIdentifiers({ commit }, [ioType, identifiers]) {
+      commit("SET_TYPE_IDENTIFIERS", [ioType, identifiers]);
     },
   },
 });

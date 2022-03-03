@@ -1,5 +1,7 @@
 <script lang="ts">
+import { isFunctionType } from "@vue/compiler-core";
 import { defineComponent } from "vue";
+import { useStore } from "/@/store/index";
 
 export default defineComponent({
   props: {
@@ -7,14 +9,15 @@ export default defineComponent({
     examples: String,
   },
   setup() {
+    const store = useStore();
+    const identifierChange = (event: any, ioType: string | undefined) => {
+      const identifiers = event.target.value.split(",");
+      store.dispatch("setTypeIdentifiers", [ioType, identifiers]);
+    };
     return {
       identifiers: "",
+      identifierChange,
     };
-  },
-  methods: {
-    identifierChange: function (event: any) {
-      console.log(this.identifiers);
-    },
   },
 });
 </script>
@@ -41,8 +44,9 @@ export default defineComponent({
     <input
       class="xs:w-full sm:w-full md:w-140 lg:w-140 xl:w-140 2xl:w-140 rounded border border-gray-300"
       type="text"
+      spellcheck="false"
       v-model="identifiers"
-      v-on:change="identifierChange"
+      v-on:input="identifierChange($event, ioType)"
     />
   </div>
 </template>
