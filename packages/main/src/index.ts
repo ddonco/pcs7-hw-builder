@@ -10,6 +10,7 @@ let hardwareInfo: { [type: string]: number } = {};
 let ioFilePath: string = "";
 let parsedHeaders: string[] = [];
 let ioColumnNames: { [col: string]: string } = {};
+let ioTypeIdentifier: { [ioType: string]: string[] } = {};
 let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
 let userAddressParams = {
@@ -88,39 +89,46 @@ app.on("web-contents-created", (event, webContents) => {
   ipcMain.on("toMain", (event, args) => {
     console.log(args);
 
-    let ioTypeIdentifier = {
-      di: ["DI Dry Contact"],
-      do: ["DO High Side"],
-      ai: ["AI2", "AI4"],
-      ao: ["AO"],
-    };
-    ioColumnNames = {
-      tagName: "TagID",
-      description: "Service",
-      rack: "Rack",
-      slot: "PCS7 Slot",
-      channel: "Chn",
-      ioType: "I/O Type",
-    };
+    // let ioTypeIdentifier = {
+    //   di: ["DI Dry Contact"],
+    //   do: ["DO High Side"],
+    //   ai: ["AI2", "AI4"],
+    //   ao: ["AO"],
+    // };
+    // ioColumnNames = {
+    //   tagName: "TagID",
+    //   description: "Service",
+    //   rack: "Rack",
+    //   slot: "PCS7 Slot",
+    //   channel: "Chn",
+    //   ioType: "I/O Type",
+    // };
 
     if ("assignedIoFilePath" in args) {
       try {
         ioFilePath = args["assignedIoFilePath"];
         parsedHeaders = parseHeaders(ioFilePath);
-        console.log(`Column Names: ${parsedHeaders}`);
         webContents.send("fromMain", { parsedHeaders: parsedHeaders });
       } catch (e) {
         console.log(`parse headers error: ${e}`);
       }
     }
 
-    if ("parseIoFilePath" in args) {
+    if ("parseAssignedIo" in args) {
+      let payload = JSON.parse(args["payload"]);
+      ioFilePath = payload["filePath"];
+      ioColumnNames = payload["columnNames"];
+      ioTypeIdentifier = payload["identifiers"];
+      // console.log(`file path: ${ioFilePath}`);
+      // console.log(`col names: ${ioColumnNames}`);
+      // console.log(`identifiers: ${ioTypeIdentifier}`);
       [hardwareRacks, hardwareInfo] = parseAssignedIO(
         ioFilePath,
         ioColumnNames,
         ioTypeIdentifier,
         true
       );
+      console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
     }
     // const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
     // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";

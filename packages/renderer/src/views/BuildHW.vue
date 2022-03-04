@@ -26,13 +26,25 @@ export default defineComponent({
         });
         window.api.receive("fromMain", (data: any) => {
           store.dispatch("setHeaders", data.parsedHeaders);
-          console.log(`Received "${data.parsedHeaders}"`);
         });
       }
+    };
+
+    const parseAssignedIO = (event: any) => {
+      let parserInputs = {
+        filePath: store.state.ioFilePath,
+        columnNames: store.state.ioColumnNames,
+        identifiers: store.state.ioTypeIdentifiers,
+      };
+      window.api.send("toMain", {
+        parseAssignedIo: true,
+        payload: JSON.stringify(parserInputs),
+      });
     };
     return {
       setIoFilePath,
       parseHeaders,
+      parseAssignedIO,
       ioFilePath: "",
     };
   },
@@ -46,19 +58,6 @@ export default defineComponent({
     },
     clearInput: function (event: any) {
       (this.$refs["ioFilePath"] as HTMLInputElement).value = "";
-    },
-    // parseHeaders: function (event: any) {
-    //   if (this.ioFilePath) {
-    //     const store = useStore();
-    //     window.api.send("toMain", { assignedIoFilePath: this.ioFilePath });
-    //     window.api.receive("fromMain", (data: any) => {
-    //       store.commit("setHeaders", data.parsedHeaders);
-    //       // console.log(`Received "${this.headers}" from main process`);
-    //     });
-    //   }
-    // },
-    parseIoClick: function (event: any) {
-      window.api.send("toMain", { parseIoFilePath: true });
     },
     groupIOAddressChange: function (event: any) {
       console.log(event.target.checked);
@@ -143,7 +142,7 @@ export default defineComponent({
             <button
               type="button"
               class="w-40 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-              v-on:click="parseIoClick"
+              v-on:click="parseAssignedIO"
             >
               Parse IO
             </button>
