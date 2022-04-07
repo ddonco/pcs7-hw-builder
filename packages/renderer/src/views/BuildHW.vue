@@ -40,11 +40,39 @@ export default defineComponent({
         parseAssignedIo: true,
         payload: JSON.stringify(parserInputs),
       });
+      window.api.receive("fromMain", (data: any) => {
+        store.dispatch("setHardwareInfo", data.parseAssignedIo);
+      });
+    };
+
+    const getGroupedAddresses = (grouped: boolean) => {
+      let groupedAddresses = {};
+      if (grouped) {
+        groupedAddresses = {
+          di: 0,
+          do: store.state.hardwareInfo.diTotalBytes,
+          ai: 512,
+          ao: store.state.hardwareInfo.aiTotalBytes + 512,
+        };
+      } else {
+        groupedAddresses = {
+          di: 0,
+          do: 0,
+          ai: 512,
+          ao: 512,
+        };
+      }
+      store.dispatch("setStartAddresses", groupedAddresses);
+    };
+
+    const buildHwConfig = (event: any) => {
+      let buildInputs;
     };
     return {
       setIoFilePath,
       parseHeaders,
       parseAssignedIO,
+      getGroupedAddresses,
       ioFilePath: "",
     };
   },
@@ -60,7 +88,8 @@ export default defineComponent({
       (this.$refs["ioFilePath"] as HTMLInputElement).value = "";
     },
     groupIOAddressChange: function (event: any) {
-      console.log(event.target.checked);
+      let grouped = event.target.checked;
+      this.getGroupedAddresses(grouped);
     },
   },
 });

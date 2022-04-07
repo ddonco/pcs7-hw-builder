@@ -1,24 +1,27 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import IOTypeIdentifierVue from "./IOTypeIdentifier.vue";
+import { useStore } from "/@/store/index";
 
 export default defineComponent({
   props: {
     ioType: String,
   },
-  setup() {
-    return {
-      address: 0,
-    };
-  },
-  onBeforeMounted() {
-    if (this.ioType === "AI" || this.ioType === "AO") {
-      this.address = 512;
-    }
-  },
+  // setup() {
+  //   return {
+  //     address: 0,
+  //   };
+  // },
   methods: {
     addressChange: function (event: any) {
       console.log(this.address);
+    },
+  },
+  computed: {
+    address: function () {
+      const store = useStore();
+      let startAddresses = store.state.startAddress;
+      return startAddresses[String(this.ioType).toLowerCase()];
     },
   },
 });

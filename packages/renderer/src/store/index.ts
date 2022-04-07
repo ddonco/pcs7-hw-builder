@@ -18,6 +18,8 @@ export interface State {
     ai: string[];
     ao: string[];
   };
+  startAddress: { [type: string]: number };
+  hardwareInfo: { [type: string]: number };
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -40,6 +42,13 @@ export const store = createStore<State>({
       ai: [],
       ao: [],
     },
+    startAddress: {
+      di: 0,
+      do: 0,
+      ai: 512,
+      ao: 512,
+    },
+    hardwareInfo: {},
   },
   mutations: {
     SET_FILE_PATH(state, filePath) {
@@ -76,6 +85,12 @@ export const store = createStore<State>({
         state.ioTypeIdentifiers.ao = identifiers;
       }
     },
+    SET_HARDWARE_INFO(state, hardwareInfo: {}) {
+      state.hardwareInfo = hardwareInfo;
+    },
+    SET_START_ADDRESSES(state, addresses: {}) {
+      state.startAddress = addresses;
+    },
   },
   actions: {
     setFilePath({ commit }, filePath) {
@@ -89,6 +104,12 @@ export const store = createStore<State>({
     },
     setTypeIdentifiers({ commit }, [ioType, identifiers]) {
       commit("SET_TYPE_IDENTIFIERS", [ioType, identifiers]);
+    },
+    setHardwareInfo({ commit }, hardwareInfo) {
+      commit("SET_HARDWARE_INFO", hardwareInfo);
+    },
+    setStartAddresses({ commit }, groupedAddresses) {
+      commit("SET_START_ADDRESSES", groupedAddresses);
     },
   },
 });

@@ -115,20 +115,25 @@ app.on("web-contents-created", (event, webContents) => {
     }
 
     if ("parseAssignedIo" in args) {
-      let payload = JSON.parse(args["payload"]);
-      ioFilePath = payload["filePath"];
-      ioColumnNames = payload["columnNames"];
-      ioTypeIdentifier = payload["identifiers"];
-      // console.log(`file path: ${ioFilePath}`);
-      // console.log(`col names: ${ioColumnNames}`);
-      // console.log(`identifiers: ${ioTypeIdentifier}`);
-      [hardwareRacks, hardwareInfo] = parseAssignedIO(
-        ioFilePath,
-        ioColumnNames,
-        ioTypeIdentifier,
-        true
-      );
-      console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
+      try {
+        let payload = JSON.parse(args["payload"]);
+        ioFilePath = payload["filePath"];
+        ioColumnNames = payload["columnNames"];
+        ioTypeIdentifier = payload["identifiers"];
+        // console.log(`file path: ${ioFilePath}`);
+        // console.log(`col names: ${ioColumnNames}`);
+        // console.log(`identifiers: ${ioTypeIdentifier}`);
+        [hardwareRacks, hardwareInfo] = parseAssignedIO(
+          ioFilePath,
+          ioColumnNames,
+          ioTypeIdentifier,
+          true
+        );
+        console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
+        webContents.send("fromMain", { parseAssignedIo: hardwareInfo });
+      } catch (e) {
+        console.log(`parse assigned io error: ${e}`);
+      }
     }
     // const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
     // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
