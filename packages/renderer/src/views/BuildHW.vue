@@ -65,14 +65,19 @@ export default defineComponent({
       store.dispatch("setStartAddresses", groupedAddresses);
     };
 
-    const buildHwConfig = (event: any) => {
-      let buildInputs;
+    const generateHwConfig = (event: any) => {
+      if (Object.keys(store.state.hardwareInfo).length > 0) {
+        window.api.send("toMain", {
+          generateHwConfig: store.state.startAddress,
+        });
+      }
     };
     return {
       setIoFilePath,
       parseHeaders,
       parseAssignedIO,
       getGroupedAddresses,
+      generateHwConfig,
       ioFilePath: "",
     };
   },
@@ -216,6 +221,7 @@ export default defineComponent({
             <button
               type="button"
               class="w-40 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+              v-on:click="generateHwConfig"
             >
               Generate HW
             </button>

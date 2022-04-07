@@ -1,4 +1,4 @@
-import { app, ipcMain, webContents } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, webContents } from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
 import { parseAssignedIO, parseHeaders, parseRawIO } from "./utils/parser";
@@ -120,9 +120,6 @@ app.on("web-contents-created", (event, webContents) => {
         ioFilePath = payload["filePath"];
         ioColumnNames = payload["columnNames"];
         ioTypeIdentifier = payload["identifiers"];
-        // console.log(`file path: ${ioFilePath}`);
-        // console.log(`col names: ${ioColumnNames}`);
-        // console.log(`identifiers: ${ioTypeIdentifier}`);
         [hardwareRacks, hardwareInfo] = parseAssignedIO(
           ioFilePath,
           ioColumnNames,
@@ -134,6 +131,29 @@ app.on("web-contents-created", (event, webContents) => {
       } catch (e) {
         console.log(`parse assigned io error: ${e}`);
       }
+    }
+
+    if ("generateHwConfig" in args) {
+      dialog
+        .showSaveDialog({
+          title: "HWConfig Save Location",
+          defaultPath: "hwconfig.cfg",
+          properties: ["createDirectory", "showOverwriteConfirmation"],
+        })
+        .then((result) => {
+          if (String(result.filePath).length > 0) {
+            sortedRacks = buildHW(
+              String(result.filePath),
+              hardwareRacks,
+              hardwareInfo,
+              userAddressParams,
+              groupIOAddresses
+            );
+          }
+        })
+        .catch((err) => {
+          console.log(`generate hwconfig save error: ${err}`);
+        });
     }
     // const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
     // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
@@ -186,14 +206,6 @@ app.on("web-contents-created", (event, webContents) => {
       // if (Object.keys(hardwareInfo).length > 0) console.log(hardwareInfo);
 
       // webContents.send("fromMain", "parse complete");
-
-      // sortedRacks = buildHW(
-      //   outFilePath,
-      //   hardwareRacks,
-      //   hardwareInfo,
-      //   userAddressParams,
-      //   groupIOAddresses
-      // );
     }
   });
 });
