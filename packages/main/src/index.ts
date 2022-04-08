@@ -87,22 +87,7 @@ if (import.meta.env.PROD) {
 
 app.on("web-contents-created", (event, webContents) => {
   ipcMain.on("toMain", (event, args) => {
-    console.log(args);
-
-    // let ioTypeIdentifier = {
-    //   di: ["DI Dry Contact"],
-    //   do: ["DO High Side"],
-    //   ai: ["AI2", "AI4"],
-    //   ao: ["AO"],
-    // };
-    // ioColumnNames = {
-    //   tagName: "TagID",
-    //   description: "Service",
-    //   rack: "Rack",
-    //   slot: "PCS7 Slot",
-    //   channel: "Chn",
-    //   ioType: "I/O Type",
-    // };
+    console.log(`args: ${args}`);
 
     if ("assignedIoFilePath" in args) {
       try {
@@ -134,6 +119,8 @@ app.on("web-contents-created", (event, webContents) => {
     }
 
     if ("generateHwConfig" in args) {
+      userAddressParams = JSON.parse(args["generateHwConfig"]);
+      console.log(`generate hw addresses: ${userAddressParams}`);
       dialog
         .showSaveDialog({
           title: "HWConfig Save Location",
@@ -154,58 +141,6 @@ app.on("web-contents-created", (event, webContents) => {
         .catch((err) => {
           console.log(`generate hwconfig save error: ${err}`);
         });
-    }
-    // const ioFilePath = "e:/dev/electron/GPCC_IOList.xlsx";
-    // const filePath = "e:/dev/electron/Sample_IO_List-Unassigned.xlsx";
-    const outFilePath = "e:/dev/electron/GPCC_HWConfig.cfg";
-
-    if (args === "parse IO") {
-      let ioColumnNames = {
-        tagName: "TagID",
-        description: "Service",
-        rack: "Rack",
-        slot: "PCS7 Slot",
-        channel: "Chn",
-        ioType: "I/O Type",
-      };
-      let ioTypeIdentifier = {
-        di: ["DI Dry Contact"],
-        do: ["DO High Side"],
-        ai: ["AI2", "AI4"],
-        ao: ["AO"],
-      };
-
-      let groupIOAddresses = true;
-      let userAddressParams = {
-        diStart: 0,
-        doStart: 0,
-        aiStart: 512,
-        aoStart: 512,
-      };
-
-      if (groupIOAddresses) {
-        userAddressParams = {
-          diStart: 0,
-          doStart: 132,
-          aiStart: 512,
-          aoStart: 1022,
-        };
-      }
-
-      // webContents.send("fromMain", "parse started");
-
-      // let hardwareInfo = {};
-      // [hardwareRacks, hardwareInfo] = parseAssignedIO(
-      //   ioFilePath,
-      //   ioColumnNames,
-      //   ioTypeIdentifier,
-      //   true
-      // );
-      // // hardwareRacks = parseRawIO(filePath, true);
-
-      // if (Object.keys(hardwareInfo).length > 0) console.log(hardwareInfo);
-
-      // webContents.send("fromMain", "parse complete");
     }
   });
 });

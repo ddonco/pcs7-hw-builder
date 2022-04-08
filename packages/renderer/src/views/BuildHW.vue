@@ -68,7 +68,7 @@ export default defineComponent({
     const generateHwConfig = (event: any) => {
       if (Object.keys(store.state.hardwareInfo).length > 0) {
         window.api.send("toMain", {
-          generateHwConfig: store.state.startAddress,
+          generateHwConfig: JSON.stringify(store.state.startAddress),
         });
       }
     };
