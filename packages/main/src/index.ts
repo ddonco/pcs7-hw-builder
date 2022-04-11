@@ -85,62 +85,63 @@ if (import.meta.env.PROD) {
     .catch((e) => console.error("Failed check updates:", e));
 }
 
-app.on("web-contents-created", (event, webContents) => {
-  ipcMain.on("toMain", (event, args) => {
-    console.log(`args: ${args}`);
+// app.on("web-contents-created", (event, webContents) => {
+// });
 
-    if ("assignedIoFilePath" in args) {
-      try {
-        ioFilePath = args["assignedIoFilePath"];
-        parsedHeaders = parseHeaders(ioFilePath);
-        webContents.send("fromMain", { parsedHeaders: parsedHeaders });
-      } catch (e) {
-        console.log(`parse headers error: ${e}`);
-      }
-    }
+ipcMain.on("toMain", (event, args) => {
+  console.log(`args: ${args}`);
 
-    if ("parseAssignedIo" in args) {
-      try {
-        let payload = JSON.parse(args["payload"]);
-        ioFilePath = payload["filePath"];
-        ioColumnNames = payload["columnNames"];
-        ioTypeIdentifier = payload["identifiers"];
-        [hardwareRacks, hardwareInfo] = parseAssignedIO(
-          ioFilePath,
-          ioColumnNames,
-          ioTypeIdentifier,
-          true
-        );
-        console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
-        webContents.send("fromMain", { parseAssignedIo: hardwareInfo });
-      } catch (e) {
-        console.log(`parse assigned io error: ${e}`);
-      }
+  if ("assignedIoFilePath" in args) {
+    try {
+      ioFilePath = args["assignedIoFilePath"];
+      parsedHeaders = parseHeaders(ioFilePath);
+      event.sender.send("fromMain", { parsedHeaders: parsedHeaders });
+    } catch (e) {
+      console.log(`parse headers error: ${e}`);
     }
+  }
 
-    if ("generateHwConfig" in args) {
-      userAddressParams = JSON.parse(args["generateHwConfig"]);
-      console.log(`generate hw addresses: ${userAddressParams}`);
-      dialog
-        .showSaveDialog({
-          title: "HWConfig Save Location",
-          defaultPath: "hwconfig.cfg",
-          properties: ["createDirectory", "showOverwriteConfirmation"],
-        })
-        .then((result) => {
-          if (String(result.filePath).length > 0) {
-            sortedRacks = buildHW(
-              String(result.filePath),
-              hardwareRacks,
-              hardwareInfo,
-              userAddressParams,
-              groupIOAddresses
-            );
-          }
-        })
-        .catch((err) => {
-          console.log(`generate hwconfig save error: ${err}`);
-        });
+  if ("parseAssignedIo" in args) {
+    try {
+      let payload = JSON.parse(args["payload"]);
+      ioFilePath = payload["filePath"];
+      ioColumnNames = payload["columnNames"];
+      ioTypeIdentifier = payload["identifiers"];
+      [hardwareRacks, hardwareInfo] = parseAssignedIO(
+        ioFilePath,
+        ioColumnNames,
+        ioTypeIdentifier,
+        true
+      );
+      console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
+      event.sender.send("fromMain", { parseAssignedIo: hardwareInfo });
+    } catch (e) {
+      console.log(`parse assigned io error: ${e}`);
     }
-  });
+  }
+
+  if ("generateHwConfig" in args) {
+    userAddressParams = JSON.parse(args["generateHwConfig"]);
+    console.log(`generate hw addresses: ${userAddressParams}`);
+    dialog
+      .showSaveDialog({
+        title: "HWConfig Save Location",
+        defaultPath: "hwconfig.cfg",
+        properties: ["createDirectory", "showOverwriteConfirmation"],
+      })
+      .then((result) => {
+        if (String(result.filePath).length > 0) {
+          sortedRacks = buildHW(
+            String(result.filePath),
+            hardwareRacks,
+            hardwareInfo,
+            userAddressParams,
+            groupIOAddresses
+          );
+        }
+      })
+      .catch((err) => {
+        console.log(`generate hwconfig save error: ${err}`);
+      });
+  }
 });
