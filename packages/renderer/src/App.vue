@@ -11,9 +11,8 @@ export default {
   // mounted() {
   //   this.$nextTick(function () {
   //     window.api.receive("fromMain", (data: any) => {
-  //       console.log(`Received "${data}" from main process`);
+  //       console.log(`Received: ${JSON.stringify(data)}`);
   //     });
-  //     window.api.send("toMain", "right back at cha");
   //   });
   // },
 };

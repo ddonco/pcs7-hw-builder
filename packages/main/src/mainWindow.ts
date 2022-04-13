@@ -61,4 +61,5 @@ export async function restoreOrCreateWindow() {
   }
 
   window.focus();
+  return window;
 }

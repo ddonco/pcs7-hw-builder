@@ -20,6 +20,7 @@ export interface State {
   };
   startAddress: { [type: string]: number };
   hardwareInfo: { [type: string]: number };
+  logs: string[];
 }
 
 export const key: InjectionKey<Store<State>> = Symbol();
@@ -49,6 +50,7 @@ export const store = createStore<State>({
       ao: 512,
     },
     hardwareInfo: {},
+    logs: [],
   },
   mutations: {
     SET_FILE_PATH(state, filePath) {
@@ -91,6 +93,13 @@ export const store = createStore<State>({
     SET_START_ADDRESSES(state, addresses: {}) {
       state.startAddress = addresses;
     },
+    SET_LOGS(state, logs: any) {
+      // let logsStr = logs.toString();
+      // logsStr = logsStr.replace(/\"/, '"');
+      // let logsArr = logsStr.split(/\r?\n/);
+      // // let logsArr = logsStr.split(/\n/);
+      state.logs = logs["logs"];
+    },
   },
   actions: {
     setFilePath({ commit }, filePath) {
@@ -110,6 +119,9 @@ export const store = createStore<State>({
     },
     setStartAddresses({ commit }, groupedAddresses) {
       commit("SET_START_ADDRESSES", groupedAddresses);
+    },
+    setLogs({ commit }, logs) {
+      commit("SET_LOGS", logs);
     },
   },
 });

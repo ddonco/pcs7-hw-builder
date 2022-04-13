@@ -1,8 +1,16 @@
-import { app, BrowserWindow, dialog, ipcMain, webContents } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  WebContents,
+  webContents,
+} from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
 import { parseAssignedIO, parseHeaders, parseRawIO } from "./utils/parser";
 import { buildHW } from "./utils/builder";
+const fsExtra = require("fs-extra");
 
 let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
 let sortedRacks: { [rack: string]: { [slot: string]: any } } = {};
@@ -19,6 +27,8 @@ let userAddressParams = {
   aiStart: 512,
   aoStart: 512,
 };
+
+const logFile = "logs/hw_builder.log";
 
 /**
  * Prevent multiple instances
@@ -85,11 +95,18 @@ if (import.meta.env.PROD) {
     .catch((e) => console.error("Failed check updates:", e));
 }
 
-// app.on("web-contents-created", (event, webContents) => {
-// });
-
 ipcMain.on("toMain", (event, args) => {
-  console.log(`args: ${args}`);
+  if ("updateLogs" in args) {
+    try {
+      let fileContent = fsExtra.readFileSync(logFile, "utf8");
+      let logsArr = fileContent.split(/\r?\n/);
+      event.sender.send("fromMain", {
+        logs: logsArr.slice(0, -1),
+      });
+    } catch (e) {
+      console.log(`update logs error: ${e}`);
+    }
+  }
 
   if ("assignedIoFilePath" in args) {
     try {
