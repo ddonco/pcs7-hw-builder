@@ -230,19 +230,19 @@ function getGroupedIoAddresses(
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
       if (hardwareRacks[rack][slot].type === "AI") {
-        hardwareRacks[rack][slot]["startAddress"] = nextAddress["AI"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["AI"];
         nextAddress["AI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type === "AO") {
-        hardwareRacks[rack][slot]["startAddress"] = nextAddress["AO"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["AO"];
         nextAddress["AO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type === "DI") {
-        hardwareRacks[rack][slot]["startAddress"] = nextAddress["DI"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["DI"];
         nextAddress["DI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type === "DO") {
-        hardwareRacks[rack][slot]["startAddress"] = nextAddress["DO"];
+        hardwareRacks[rack][slot].startAddress = nextAddress["DO"];
         nextAddress["DO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
     }
