@@ -16,16 +16,26 @@ export function buildHW(
     [rack: string]: { [slot: string]: any };
   },
   hardwareInfo: { [type: string]: number },
-  ioStartAddress: { [moduleType: string]: number } = {},
+  ioStartAddress: { [moduleType: string]: string } = {},
   groupIoTypes: boolean = false
 ): any {
   const sortedHW = sortHW(hardwareRacks);
 
+  // Parse addresses from strings to ints
+  let ioStartAddressParsed: { [moduleType: string]: number } = {};
+  for (const key in ioStartAddress) {
+    ioStartAddressParsed[key] = parseInt(ioStartAddress[key], 10);
+  }
+
   let addressedHW: { [rack: string]: { [slot: string]: any } };
   if (groupIoTypes) {
-    addressedHW = getGroupedIoAddresses(sortedHW, hardwareInfo, ioStartAddress);
+    addressedHW = getGroupedIoAddresses(
+      sortedHW,
+      hardwareInfo,
+      ioStartAddressParsed
+    );
   } else {
-    addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddress);
+    addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddressParsed);
   }
 
   let writeStream = fs.createWriteStream(outFilePath);
@@ -155,21 +165,21 @@ function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
 
 function getShiftedIoAddresses(
   hardwareRacks: { [rack: string]: { [slot: string]: any } },
-  startAddress: { [ioType: string]: number }
+  userAddress: { [ioType: string]: number }
 ): { [rack: string]: { [slot: string]: any } } {
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
       if (
-        hardwareRacks[rack][slot].type == "AI" ||
-        hardwareRacks[rack][slot].type == "AO"
+        hardwareRacks[rack][slot].type === "AI" ||
+        hardwareRacks[rack][slot].type === "AO"
       ) {
-        hardwareRacks[rack][slot].startAddress += startAddress["aiStart"] - 512;
+        hardwareRacks[rack][slot].startAddress += userAddress["ai"] - 512;
       }
       if (
-        hardwareRacks[rack][slot].type == "DI" ||
-        hardwareRacks[rack][slot].type == "DO"
+        hardwareRacks[rack][slot].type === "DI" ||
+        hardwareRacks[rack][slot].type === "DO"
       ) {
-        hardwareRacks[rack][slot].startAddress += startAddress["diStart"];
+        hardwareRacks[rack][slot].startAddress += userAddress["di"];
       }
     }
   }
@@ -184,10 +194,10 @@ function getGroupedIoAddresses(
   [rack: string]: { [slot: string]: any };
 } {
   let nextAddress = {
-    AI: startAddress["aiStart"],
-    AO: startAddress["aoStart"],
-    DI: startAddress["diStart"],
-    DO: startAddress["doStart"],
+    AI: startAddress["ai"],
+    AO: startAddress["ao"],
+    DI: startAddress["di"],
+    DO: startAddress["do"],
   };
 
   if (
@@ -219,20 +229,20 @@ function getGroupedIoAddresses(
 
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
-      if (hardwareRacks[rack][slot].type == "AI") {
-        hardwareRacks[rack][slot].startAddress = nextAddress["AI"];
+      if (hardwareRacks[rack][slot].type === "AI") {
+        hardwareRacks[rack][slot]["startAddress"] = nextAddress["AI"];
         nextAddress["AI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
-      if (hardwareRacks[rack][slot].type == "AO") {
-        hardwareRacks[rack][slot].startAddress = nextAddress["AO"];
+      if (hardwareRacks[rack][slot].type === "AO") {
+        hardwareRacks[rack][slot]["startAddress"] = nextAddress["AO"];
         nextAddress["AO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
-      if (hardwareRacks[rack][slot].type == "DI") {
-        hardwareRacks[rack][slot].startAddress = nextAddress["DI"];
+      if (hardwareRacks[rack][slot].type === "DI") {
+        hardwareRacks[rack][slot]["startAddress"] = nextAddress["DI"];
         nextAddress["DI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
-      if (hardwareRacks[rack][slot].type == "DO") {
-        hardwareRacks[rack][slot].startAddress = nextAddress["DO"];
+      if (hardwareRacks[rack][slot].type === "DO") {
+        hardwareRacks[rack][slot]["startAddress"] = nextAddress["DO"];
         nextAddress["DO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
     }

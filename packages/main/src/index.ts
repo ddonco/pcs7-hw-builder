@@ -22,10 +22,10 @@ let ioTypeIdentifier: { [ioType: string]: string[] } = {};
 let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
 let userAddressParams = {
-  diStart: 0,
-  doStart: 0,
-  aiStart: 512,
-  aoStart: 512,
+  di: 0,
+  do: 0,
+  ai: 512,
+  ao: 512,
 };
 
 const logFile = "logs/hw_builder.log";
@@ -139,7 +139,6 @@ ipcMain.on("toMain", (event, args) => {
 
   if ("generateHwConfig" in args) {
     userAddressParams = JSON.parse(args["generateHwConfig"]);
-    console.log(`generate hw addresses: ${userAddressParams}`);
     dialog
       .showSaveDialog({
         title: "HWConfig Save Location",
