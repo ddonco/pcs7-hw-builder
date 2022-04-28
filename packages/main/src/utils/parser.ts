@@ -186,7 +186,6 @@ export function parseAssignedIO(
       });
   }
 
-  // console.log(hardwareRacks);
   return [hardwareRacks, addressLookup];
 }
 
@@ -292,7 +291,6 @@ export function parseRawIO(
     let tagName: string = dfArray[r]["Tagnames"];
     let description: string = dfArray[r]["Comment"];
     let channelType: string = dfArray[r]["Type"];
-    // console.log(tagName, description, channelType);
 
     if (description === "undefined" || typeof description === "undefined")
       description = "";
@@ -392,7 +390,6 @@ export function parseRawIO(
       moduleList[i].updateChannelAddresses();
       hardwareRacks[currentRack][currentSlot] = moduleList[i];
       currentSlot++;
-      // console.log("Inspect Channels:", moduleList[i].channels);
 
       if (groupIoModuleTypes && moduleList[i].type !== previousModuleType) {
         if (previousModuleType !== "") currentRack++;

@@ -9,7 +9,12 @@ export const hwBuilderLogger = winston.createLogger({
   ),
   defaultMeta: { service: "main" },
   transports: [
-    new winston.transports.File({ filename: "logs/hw_builder.log" }),
+    new winston.transports.File({
+      filename: "logs/hw_builder.log",
+      options: {
+        flags: "w",
+      },
+    }),
   ],
 });
 
