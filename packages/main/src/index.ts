@@ -16,17 +16,13 @@ let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
 let sortedRacks: { [rack: string]: { [slot: string]: any } } = {};
 let hardwareInfo: { [type: string]: number } = {};
 let ioFilePath: string = "";
+let driveFilePath: string = "";
 let parsedHeaders: string[] = [];
 let ioColumnNames: { [col: string]: string } = {};
 let ioTypeIdentifier: { [ioType: string]: string[] } = {};
 let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
-let userAddressParams = {
-  di: 0,
-  do: 0,
-  ai: 512,
-  ao: 512,
-};
+let userAddressParams: { [ioType: string]: string } = {};
 
 const logFile = "logs/hw_builder.log";
 

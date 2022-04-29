@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import BuildHW from "/@/views/BuildHW.vue";
+import BuildDrives from "/@/views/BuildDrives.vue";
 import HWSelection from "/@/views/HWSelection.vue";
 import AssignIO from "/@/views/AssignIO.vue";
 import Logs from "/@/views/Logs.vue";
@@ -9,6 +10,11 @@ const routes = [
     path: "/",
     name: "BuildHW",
     component: BuildHW,
+  },
+  {
+    path: "/build-drives",
+    name: "BuildDrives",
+    component: BuildDrives,
   },
   {
     path: "/hw-selection",

@@ -24,7 +24,7 @@ export default defineComponent({
 
 <template>
   <div class="flex flex-row pt-2">
-    <div class="group cursor-default relative inline-block w-10 pr-2">
+    <div class="group cursor-default relative inline-block w-12 pr-2">
       {{ ioType }}:
       <div
         class="opacity-0 w-40 bg-gray-600 text-white text-center text-xs rounded-lg py-1 absolute z-10 group-hover:opacity-100 bottom-full -left-1/2 ml-14 px-1 pointer-events-none"

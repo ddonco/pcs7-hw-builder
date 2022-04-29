@@ -3,6 +3,7 @@ import { createStore, useStore as baseUseStore, Store } from "vuex";
 
 export interface State {
   ioFilePath: string;
+  driveFilePath: string;
   ioColumnNames: {
     tagName: string;
     description: string;
@@ -11,12 +12,21 @@ export interface State {
     channel: string;
     ioType: string;
   };
+  driveColumnNames: {
+    tagName: string;
+    description: string;
+    driveType: string;
+    currentRating: string;
+  };
   headers: string[];
   ioTypeIdentifiers: {
     di: string[];
     do: string[];
     ai: string[];
     ao: string[];
+  };
+  driveTypeIdentifiers: {
+    drive: string[];
   };
   startAddress: { [type: string]: number };
   hardwareInfo: { [type: string]: number };
@@ -28,6 +38,7 @@ export const key: InjectionKey<Store<State>> = Symbol();
 export const store = createStore<State>({
   state: {
     ioFilePath: "",
+    driveFilePath: "",
     ioColumnNames: {
       tagName: "",
       description: "",
@@ -36,12 +47,21 @@ export const store = createStore<State>({
       channel: "",
       ioType: "",
     },
+    driveColumnNames: {
+      tagName: "",
+      description: "",
+      driveType: "",
+      currentRating: "",
+    },
     headers: [],
     ioTypeIdentifiers: {
       di: [],
       do: [],
       ai: [],
       ao: [],
+    },
+    driveTypeIdentifiers: {
+      drive: [],
     },
     startAddress: {
       di: 0,
@@ -94,10 +114,6 @@ export const store = createStore<State>({
       state.startAddress = addresses;
     },
     SET_LOGS(state, logs: any) {
-      // let logsStr = logs.toString();
-      // logsStr = logsStr.replace(/\"/, '"');
-      // let logsArr = logsStr.split(/\r?\n/);
-      // // let logsArr = logsStr.split(/\n/);
       state.logs = logs["logs"];
     },
   },
