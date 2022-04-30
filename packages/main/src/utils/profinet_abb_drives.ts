@@ -1,17 +1,22 @@
 import { ABBUMC100, ABBVFD } from "./drive_module";
 
-export function buildUMC100(driveParams: ABBUMC100): string {
-  const deviceHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${driveParams.name}"`;
-  const slot0Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${driveParams.name}"`;
-  const slot0X1Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "PN-IO"`;
-  const slot0X1P1RHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "Port1"`;
-  const slot0X1P2RHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "Port2"`;
-  const slot1Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 1, "GSDML-V2.4-ABB-PNU32-20210223.xml<UMC100.3>", "UMC100.3"`;
+export function buildUMC100(drive: ABBUMC100): string {
+  const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${drive.name}"\n`;
+  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${drive.name}"\n`;
+  const slot0X1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "PN-IO"\n`;
+  const slot0X1P1RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "Port1"\n`;
+  const slot0X1P2RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "Port2"\n`;
+  const slot1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, "GSDML-V2.4-ABB-PNU32-20210223.xml<UMC100.3>", "UMC100.3"\n`;
 
   let starterType = "ENUM_ENTRY_UMC100_CONTROL_FUNCTION_DIRECT_STARTER";
-  if (driveParams.type === "FVR") {
+  if (drive.type === "FVR") {
     starterType = "ENUM_ENTRY_UMC100_CONTROL_FUNCTION_REVERSE_STARTER";
   }
+
+  let ipAddress = "";
+  drive.ipAddress.forEach((item, index) => {
+    ipAddress += item.toString(16).padStart(2, "0");
+  });
 
   const pnioData = `REDUNDANT 
 BEGIN
@@ -46,14 +51,14 @@ BEGIN
   PN_DEVICE_UPD_TIME "2"
   PLANT_DESIGNATION ""
   IRT_GROUP_NR "1"
-END`;
+END\n`;
 
   const slot0 = `AUTOCREATED 
 BEGIN 
   ASSET_ID "1387C4B9132D48ED90AA0F43985C6ADE"
   MACADDRESS "080006010000"
   IPACTIVE "1"
-  IPADDRESS "C064660C"
+  IPADDRESS "${ipAddress}"
   SUBNETMASK "FFFFFF00"
   ROUTERADDRESS "C064660C"
   ROUTERACTIVE "0"
@@ -93,7 +98,7 @@ PARAMETER
   "EnableNTPClientText PRDIndex 6 DataID 3", "ENUM_ENTRY_DISABLE_ID"
   "EnableModbusText PRDIndex 6 DataID 4", "ENUM_ENTRY_DISABLE_ID"
   "EnableHTTPText PRDIndex 6 DataID 5", "ENUM_ENTRY_DISABLE_ID"
-END`;
+END\n`;
 
   const slot0X1 = `AUTOCREATED 
 BEGIN 
@@ -146,7 +151,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15920, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot0X1P1R = `AUTOCREATED 
 BEGIN 
@@ -188,7 +193,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15919, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot0X1P2R = `AUTOCREATED 
 BEGIN 
@@ -230,7 +235,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15918, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot1 = `AUTOCREATED 
 BEGIN 
@@ -257,16 +262,12 @@ BEGIN
   COMMENT ""
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
-  ADDRESS  ${driveParams.inAddress}, 0, 16, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 16, 0, 0, 0
 LOCAL_OUT_ADDRESSES 
-  ADDRESS  ${driveParams.outAddress}, 0, 12, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 12, 0, 0, 0
 PARAMETER 
-  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${
-    driveParams.currentRating * 100
-  }"
-  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${
-    driveParams.currentRating * 100
-  }"
+  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${drive.currentRating * 100}"
+  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${drive.currentRating * 100}"
   "UMC100_YD_STARTING_TIME PRDIndex 0 DataID 64", "600"
   "UMC100_CURRENT_FACTOR PRDIndex 0 DataID 80", "100"
   "UMC100_COOLING_TIME PRDIndex 0 DataID 96", "120"
@@ -449,7 +450,7 @@ PARAMETER
   "UMC100_THD_WARNING_LEVEL PRDIndex 0 DataID 1112", "10"
   "UMC100_LOAD_STARTUP_DELAY PRDIndex 0 DataID 1120", "0"
   "UMC100_THD_WARNING_DELAY PRDIndex 0 DataID 1128", "5"
-END`;
+END\n`;
 
   return (
     deviceHeader +
@@ -467,13 +468,18 @@ END`;
   );
 }
 
-export function buildACSVFD(driveParams: ABBVFD): string {
-  const deviceHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "${driveParams.name}"`;
-  const slot0Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "FENA"`;
-  const slot0X1Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "Interface"`;
-  const slot0X1P1RHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 1"`;
-  const slot0X1P2RHeader = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 2"`;
-  const slot1Header = `IOSUBSYSTEM ${driveParams.ioSubsystem}, IOADDRESS ${driveParams.nodeAddress}, SLOT 1, "GSDML-V2.33-ABB-FENA-20170914.xml<ID_MODULE_PPO6>", "PPO Type 6"`;
+export function buildACSVFD(drive: ABBVFD): string {
+  const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "${drive.name}"\n`;
+  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "FENA"\n`;
+  const slot0X1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "Interface"\n`;
+  const slot0X1P1RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 1"\n`;
+  const slot0X1P2RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 2"\n`;
+  const slot1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, "GSDML-V2.33-ABB-FENA-20170914.xml<ID_MODULE_PPO6>", "PPO Type 6"\n`;
+
+  let ipAddress = "";
+  drive.ipAddress.forEach((item, index) => {
+    ipAddress += item.toString(16).padStart(2, "0");
+  });
 
   const pnioData = `BEGIN
   ASSET_ID "0F3D0067C2AD4B55B288E3DA645D24CF"
@@ -507,14 +513,14 @@ export function buildACSVFD(driveParams: ABBVFD): string {
   PN_DEVICE_UPD_TIME "2"
   PLANT_DESIGNATION ""
   IRT_GROUP_NR "1"
-END`;
+END\n`;
 
   const slot0 = `AUTOCREATED 
 BEGIN 
   ASSET_ID "8D246E78F4E3408884A09A065C85B3E9"
   MACADDRESS "080006010000"
   IPACTIVE "1"
-  IPADDRESS "C064660D"
+  IPADDRESS "${ipAddress}"
   SUBNETMASK "FFFFFF00"
   ROUTERADDRESS "C064660D"
   ROUTERACTIVE "0"
@@ -543,7 +549,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15917, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot0X1 = `AUTOCREATED 
 BEGIN 
@@ -596,7 +602,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15916, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot0X1P1R = `AUTOCREATED 
 BEGIN 
@@ -638,7 +644,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15915, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot0X1P2R = `AUTOCREATED 
 BEGIN 
@@ -680,7 +686,7 @@ BEGIN
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
   ADDRESS  15914, 0, 0, 0, 0, 0
-END`;
+END\n`;
 
   const slot1 = `BEGIN 
   ASSET_ID "8F921B35D9624C9D906B8F5BF80D2650"
@@ -710,9 +716,9 @@ END`;
   PLANT_DESIGNATION ""
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
-  ADDRESS  ${driveParams.inAddress}, 0, 20, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 20, 0, 0, 0
 LOCAL_OUT_ADDRESSES 
-  ADDRESS  ${driveParams.outAddress}, 0, 20, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 20, 0, 0, 0
 PARAMETER 
   "T_ID_STOP_ACTION_VALUE_SEL PRDIndex 1 DataID 0", "T_ID_STOP_ACTION_STOP"
   "T_ID_CONTROL_ZERO_MODE_VALUE_SEL PRDIndex 1 DataID 8", "T_ID_CONTROL_ZERO_USE"
@@ -726,7 +732,7 @@ PARAMETER
   "T_ID_FAIL_SAFE_VALUE_OUT_PZD8 PRDIndex 1 DataID 128", "0"
   "T_ID_FAIL_SAFE_VALUE_OUT_PZD9 PRDIndex 1 DataID 144", "0"
   "T_ID_FAIL_SAFE_VALUE_OUT_PZD10 PRDIndex 1 DataID 160", "0"
-END`;
+END\n`;
 
   return (
     deviceHeader +

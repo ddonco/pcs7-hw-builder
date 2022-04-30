@@ -6,10 +6,15 @@ export default defineComponent({
   props: {
     ioType: String,
   },
-  methods: {
-    addressChange: function (event: any) {
-      console.log(this.address);
-    },
+  setup() {
+    const store = useStore();
+    const addressChange = (event: any, ioType: String) => {
+      store.dispatch("setIndividualAddress", [
+        String(ioType).toLowerCase(),
+        parseInt(event.target.value, 10),
+      ]);
+    };
+    return { addressChange };
   },
   computed: {
     address: function () {
@@ -30,7 +35,7 @@ export default defineComponent({
       class="w-20 pr-2 text-right rounded border border-gray-300"
       type="text"
       v-model="address"
-      v-on:change="addressChange"
+      v-on:change="addressChange($event, ioType)"
     />
   </div>
 </template>

@@ -8,7 +8,9 @@ import {
   AO_6DL11356TF000PH1,
   HWModule,
 } from "./hw_module";
+import { ABBUMC100, ABBVFD } from "./drive_module";
 import { hwBuilderLogger } from "./logger";
+import { createConditionalExpression } from "@vue/compiler-core";
 
 const childLogger = hwBuilderLogger.child({ component: "io-parser" });
 
@@ -16,6 +18,9 @@ const DI_MODULE = "DI";
 const DO_MODULE = "DO";
 const AI_MODULE = "AI";
 const AO_MODULE = "AO";
+const VFD_MODULE = "VFD";
+const FVNR_MODULE = "FVNR";
+const FVR_MODULE = "FVR";
 const DIGITAL_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
 
@@ -189,6 +194,107 @@ export function parseAssignedIO(
   return [hardwareRacks, addressLookup];
 }
 
+export function parseDrives(
+  driveFilePath: string,
+  columnNames: { [columnName: string]: string },
+  typeIdentifier: { [moduleType: string]: string[] },
+  userAddressParams: { [component: string]: string } = {}
+): [
+  {
+    [node: string]: {};
+  },
+  { [type: string]: number }
+] {
+  const worksheet = xlsx.parse(fs.readFileSync(driveFilePath));
+  const data: any = worksheet[0]["data"];
+
+  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  let df = new DataFrame({
+    columnNames: headers,
+    rows: data.slice(1, data.length),
+  });
+
+  let drives: { [node: string]: {} } = {};
+  let driveModule: {};
+  let currentNode: number;
+  let ipAddressArr: number[];
+  let addressLookup: { [component: string]: number } = {
+    nextDriveAddress: parseInt(userAddressParams.drive, 10),
+    nextNodeAddress: parseInt(userAddressParams.node, 10),
+    ioSubSystem: parseInt(userAddressParams.iosubsys, 10),
+    driveCount: 0,
+    driveTotalBytes: 0,
+  };
+
+  let dfArray = df.toArray();
+  for (let row = 1; row < dfArray.length; row++) {
+    let tagName: string = dfArray[row][columnNames.tagName];
+    let description: string = dfArray[row][columnNames.description];
+    let ipAddress: string = dfArray[row][columnNames.ipAddress];
+    let driveType: string = dfArray[row][columnNames.driveType];
+    let ampRating: number = parseInt(dfArray[row][columnNames.ampRating], 10);
+    ipAddressArr = [];
+
+    if (description === "undefined" || typeof description === "undefined") {
+      description = "";
+    }
+    if (ampRating == 0 || typeof ampRating === "undefined") {
+      ampRating = 50;
+    }
+
+    if (
+      typeof tagName === "undefined" ||
+      typeof description === "undefined" ||
+      typeof ipAddress === "undefined" ||
+      typeof driveType === "undefined" ||
+      typeof ampRating === "undefined"
+    ) {
+      childLogger.error(
+        `a required column has been found with undefined value, this tag has been skipped`,
+        {
+          tagName: String(tagName),
+          description: String(description),
+          ipAddress: String(ipAddress),
+          driveType: String(driveType),
+          ampRating: String(ampRating),
+        }
+      );
+      continue;
+    }
+
+    ipAddress.split(".").forEach((item, index) => {
+      ipAddressArr.push(parseInt(item, 10));
+    });
+
+    if (typeIdentifier.vfd.indexOf(driveType) > -1) {
+      driveType = "VFD";
+    } else if (typeIdentifier.fvnr.indexOf(driveType) > -1) {
+      driveType = "FVNR";
+    } else if (typeIdentifier.fvr.indexOf(driveType) > -1) {
+      driveType = "FVR";
+    }
+
+    try {
+      currentNode = addressLookup.nextNodeAddress;
+      [driveModule, addressLookup] = buildDrive(
+        tagName,
+        driveType,
+        ampRating,
+        addressLookup,
+        ipAddressArr
+      );
+      drives[currentNode] = driveModule;
+    } catch (error) {
+      childLogger.error(`build drive failed, row ${row}`, {
+        tagName: tagName,
+        driveType: driveType,
+        ampRating: ampRating,
+      });
+    }
+  }
+  return [drives, addressLookup];
+}
+
 function buildModule(
   rack: number,
   slot: number,
@@ -252,6 +358,44 @@ function buildModule(
       moduleType: moduleType,
     }
   );
+  return [{}, addressLookup];
+}
+
+function buildDrive(
+  tagName: string,
+  driveType: string,
+  ampRating: number,
+  addressLookup: { [type: string]: number },
+  ipAddress: number[]
+): [any, { [type: string]: number }] {
+  if (driveType === VFD_MODULE) {
+    let driveModule = new ABBVFD(
+      tagName,
+      addressLookup.nextNodeAddress,
+      addressLookup.ioSubSystem,
+      addressLookup.nextDriveAddress,
+      ipAddress
+    );
+    addressLookup.nextNodeAddress = driveModule.nextNodeAddress();
+    addressLookup.nextDriveAddress = driveModule.nextStartAddress();
+    return [driveModule, addressLookup];
+  }
+  if (driveType === FVNR_MODULE || driveType === FVR_MODULE) {
+    let driveModule = new ABBUMC100(
+      tagName,
+      addressLookup.nextNodeAddress,
+      addressLookup.ioSubSystem,
+      addressLookup.nextDriveAddress,
+      ipAddress,
+      driveType,
+      ampRating
+    );
+    addressLookup.nextNodeAddress = driveModule.nextNodeAddress();
+    addressLookup.nextDriveAddress = driveModule.nextStartAddress();
+
+    return [driveModule, addressLookup];
+  }
+
   return [{}, addressLookup];
 }
 

@@ -8,21 +8,29 @@ import {
 } from "electron";
 import "./security-restrictions";
 import { restoreOrCreateWindow } from "/@/mainWindow";
-import { parseAssignedIO, parseHeaders, parseRawIO } from "./utils/parser";
-import { buildHW } from "./utils/builder";
+import {
+  parseAssignedIO,
+  parseHeaders,
+  parseRawIO,
+  parseDrives,
+} from "./utils/parser";
+import { buildHWConfig, buildDrivesConfig } from "./utils/builder";
 const fsExtra = require("fs-extra");
 
 let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
+let drives: { [node: string]: {} } = {};
 let sortedRacks: { [rack: string]: { [slot: string]: any } } = {};
 let hardwareInfo: { [type: string]: number } = {};
+let driveInfo: { [type: string]: number } = {};
 let ioFilePath: string = "";
 let driveFilePath: string = "";
 let parsedHeaders: string[] = [];
-let ioColumnNames: { [col: string]: string } = {};
-let ioTypeIdentifier: { [ioType: string]: string[] } = {};
+let columnNames: { [col: string]: string } = {};
+let typeIdentifier: { [ioType: string]: string[] } = {};
 let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
 let userAddressParams: { [ioType: string]: string } = {};
+let startIpAddress: string;
 
 const logFile = "logs/hw_builder.log";
 
@@ -92,6 +100,7 @@ if (import.meta.env.PROD) {
 }
 
 ipcMain.on("toMain", (event, args) => {
+  console.log(`args: ${JSON.stringify(args)}`);
   if ("updateLogs" in args) {
     try {
       let fileContent = fsExtra.readFileSync(logFile, "utf8");
@@ -114,16 +123,26 @@ ipcMain.on("toMain", (event, args) => {
     }
   }
 
+  if ("assignedDriveFilePath" in args) {
+    try {
+      driveFilePath = args["assignedDriveFilePath"];
+      parsedHeaders = parseHeaders(driveFilePath);
+      event.sender.send("fromMain", { parsedHeaders: parsedHeaders });
+    } catch (e) {
+      console.log(`parse headers error: ${e}`);
+    }
+  }
+
   if ("parseAssignedIo" in args) {
     try {
       let payload = JSON.parse(args["payload"]);
       ioFilePath = payload["filePath"];
-      ioColumnNames = payload["columnNames"];
-      ioTypeIdentifier = payload["identifiers"];
+      columnNames = payload["columnNames"];
+      typeIdentifier = payload["identifiers"];
       [hardwareRacks, hardwareInfo] = parseAssignedIO(
         ioFilePath,
-        ioColumnNames,
-        ioTypeIdentifier,
+        columnNames,
+        typeIdentifier,
         true
       );
       console.log(`hardwareInfo: ${JSON.stringify(hardwareInfo)}`);
@@ -143,13 +162,48 @@ ipcMain.on("toMain", (event, args) => {
       })
       .then((result) => {
         if (String(result.filePath).length > 0) {
-          sortedRacks = buildHW(
+          sortedRacks = buildHWConfig(
             String(result.filePath),
             hardwareRacks,
             hardwareInfo,
             userAddressParams,
             groupIOAddresses
           );
+        }
+      })
+      .catch((err) => {
+        console.log(`generate hwconfig save error: ${err}`);
+      });
+  }
+
+  if ("generateDriveConfig" in args) {
+    try {
+      let payload = JSON.parse(args["payload"]);
+      driveFilePath = payload["filePath"];
+      columnNames = payload["columnNames"];
+      typeIdentifier = payload["identifiers"];
+      userAddressParams = payload["startAddress"];
+      [drives, driveInfo] = parseDrives(
+        driveFilePath,
+        columnNames,
+        typeIdentifier,
+        userAddressParams
+      );
+      // console.log(`driveInfo: ${JSON.stringify(driveInfo)}`);
+      event.sender.send("fromMain", { generateDriveConfig: driveInfo });
+    } catch (e) {
+      console.log(`generate drives config error: ${e}`);
+    }
+
+    dialog
+      .showSaveDialog({
+        title: "Drives Config Save Location",
+        defaultPath: "drives_config.cfg",
+        properties: ["createDirectory", "showOverwriteConfirmation"],
+      })
+      .then((result) => {
+        if (String(result.filePath).length > 0) {
+          sortedRacks = buildDrivesConfig(String(result.filePath), drives);
         }
       })
       .catch((err) => {

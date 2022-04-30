@@ -19,9 +19,9 @@ export default {
     };
 
     const parseHeaders = (event: any) => {
-      if (store.state.ioFilePath) {
+      if (store.state.driveFilePath) {
         window.api.send("toMain", {
-          assignedIoFilePath: store.state.ioFilePath,
+          assignedDriveFilePath: store.state.driveFilePath,
         });
         window.api.receive("fromMain", (data: any) => {
           store.dispatch("setHeaders", data.parsedHeaders);
@@ -29,18 +29,18 @@ export default {
       }
     };
 
-    const parseAssignedIO = (event: any) => {
+    const parseDrives = (event: any) => {
       let parserInputs = {
-        filePath: store.state.ioFilePath,
-        columnNames: store.state.ioColumnNames,
-        identifiers: store.state.ioTypeIdentifiers,
+        filePath: store.state.driveFilePath,
+        columnNames: store.state.columnNames,
+        identifiers: store.state.typeIdentifiers,
       };
       window.api.send("toMain", {
-        parseAssignedIo: true,
+        parseDrives: true,
         payload: JSON.stringify(parserInputs),
       });
       window.api.receive("fromMain", (data: any) => {
-        store.dispatch("setHardwareInfo", data.parseAssignedIo);
+        store.dispatch("setDriveInfo", data.parseDrives);
       });
     };
 
@@ -58,32 +58,36 @@ export default {
       store.dispatch("setStartAddresses", groupedAddresses);
     };
 
-    const generateHwConfig = (event: any) => {
-      if (Object.keys(store.state.hardwareInfo).length > 0) {
-        window.api.send("toMain", {
-          generateHwConfig: JSON.stringify(store.state.startAddress),
-        });
-      }
+    const generateDriveConfig = (event: any) => {
+      const builderInputs = {
+        filePath: store.state.driveFilePath,
+        columnNames: store.state.columnNames,
+        identifiers: store.state.typeIdentifiers,
+        startAddress: store.state.startAddress,
+      };
+      window.api.send("toMain", {
+        generateDriveConfig: true,
+        payload: JSON.stringify(builderInputs),
+      });
     };
     return {
       setDriveFilePath,
       parseHeaders,
-      parseAssignedIO,
       getGroupedAddresses,
-      generateHwConfig,
-      ioFilePath: "",
+      generateDriveConfig,
+      driveFilePath: "",
     };
   },
   methods: {
     filePathChange: function (event: any) {
       let filePath = event.target.files[0].path;
       if (filePath) {
-        this.ioFilePath = filePath;
+        this.driveFilePath = filePath;
         this.setDriveFilePath(event, filePath);
       }
     },
     clearInput: function (event: any) {
-      (this.$refs["ioFilePath"] as HTMLInputElement).value = "";
+      (this.$refs["driveFilePath"] as HTMLInputElement).value = "";
     },
   },
 };
@@ -100,7 +104,7 @@ export default {
           class="block w-100 h-min text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
           aria-describedby="file_path_help"
           id="file_path"
-          ref="ioFilePath"
+          ref="driveFilePath"
           type="file"
           v-on:click="clearInput"
           v-on:change="filePathChange"
@@ -136,6 +140,10 @@ export default {
                 :columnId="'description'"
               />
               <ColumnNameConfig
+                :columnName="'IP Address'"
+                :columnId="'ipAddress'"
+              />
+              <ColumnNameConfig
                 :columnName="'Drive Type'"
                 :columnId="'driveType'"
               />
@@ -168,27 +176,6 @@ export default {
     </div>
     <div class="flex pl-2 bg-emerald-100">
       <div class="text-3xl self-center">3.</div>
-      <div class="flex flex-row w-full pt-2 pb-2 pl-2 cursor-default">
-        <div
-          class="w-full divide-y divide-gray-500 cursor-default font-semibold"
-        >
-          <div>Parse Motor List</div>
-          <div>
-            <div class="pt-2 w-full text-center">
-              <button
-                type="button"
-                class="w-40 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-                v-on:click="parseAssignedIO"
-              >
-                Parse Motors
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="flex pl-2 bg-emerald-200">
-      <div class="text-3xl self-center">4.</div>
       <div>
         <div class="flex flex-row w-full pt-2 pl-2 cursor-default">
           <div
@@ -204,12 +191,14 @@ export default {
               Specify starting point for drive addresses.
             </p>
             <IOAddressStart :ioType="'Drive'" />
+            <IOAddressStart :ioType="'Node'" />
+            <IOAddressStart :ioType="'IOSubSys'" />
           </div>
         </div>
       </div>
     </div>
-    <div class="flex pl-2 bg-emerald-300">
-      <div class="text-3xl self-center">5.</div>
+    <div class="flex pl-2 bg-emerald-200">
+      <div class="text-3xl self-center">4.</div>
       <div class="flex flex-row w-full pt-2 pb-2 pl-2 cursor-default">
         <div
           class="w-full divide-y divide-gray-500 cursor-default font-semibold"
@@ -220,7 +209,7 @@ export default {
               <button
                 type="button"
                 class="w-40 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-                v-on:click="generateHwConfig"
+                v-on:click="generateDriveConfig"
               >
                 Generate Drives
               </button>

@@ -16,7 +16,7 @@ export default defineComponent({
     const store = useStore();
 
     const setIoFilePath = (event: any, filePath: string) => {
-      store.dispatch("setFilePath", filePath);
+      store.dispatch("setIoFilePath", filePath);
     };
 
     const parseHeaders = (event: any) => {
@@ -33,8 +33,8 @@ export default defineComponent({
     const parseAssignedIO = (event: any) => {
       let parserInputs = {
         filePath: store.state.ioFilePath,
-        columnNames: store.state.ioColumnNames,
-        identifiers: store.state.ioTypeIdentifiers,
+        columnNames: store.state.columnNames,
+        identifiers: store.state.typeIdentifiers,
       };
       window.api.send("toMain", {
         parseAssignedIo: true,

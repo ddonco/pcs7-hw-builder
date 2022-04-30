@@ -4,32 +4,30 @@ import { createStore, useStore as baseUseStore, Store } from "vuex";
 export interface State {
   ioFilePath: string;
   driveFilePath: string;
-  ioColumnNames: {
+  columnNames: {
     tagName: string;
     description: string;
     rack: string;
     slot: string;
     channel: string;
+    ipAddress: string;
     ioType: string;
-  };
-  driveColumnNames: {
-    tagName: string;
-    description: string;
     driveType: string;
-    currentRating: string;
+    ampRating: string;
   };
   headers: string[];
-  ioTypeIdentifiers: {
+  typeIdentifiers: {
     di: string[];
     do: string[];
     ai: string[];
     ao: string[];
-  };
-  driveTypeIdentifiers: {
-    drive: string[];
+    vfd: string[];
+    fvnr: string[];
+    fvr: string[];
   };
   startAddress: { [type: string]: number };
   hardwareInfo: { [type: string]: number };
+  driveInfo: { [type: string]: number };
   logs: string[];
 }
 
@@ -39,42 +37,46 @@ export const store = createStore<State>({
   state: {
     ioFilePath: "",
     driveFilePath: "",
-    ioColumnNames: {
+    columnNames: {
       tagName: "",
       description: "",
       rack: "",
       slot: "",
       channel: "",
+      ipAddress: "",
       ioType: "",
-    },
-    driveColumnNames: {
-      tagName: "",
-      description: "",
       driveType: "",
-      currentRating: "",
+      ampRating: "",
     },
     headers: [],
-    ioTypeIdentifiers: {
+    typeIdentifiers: {
       di: [],
       do: [],
       ai: [],
       ao: [],
-    },
-    driveTypeIdentifiers: {
-      drive: [],
+      vfd: [],
+      fvnr: [],
+      fvr: [],
     },
     startAddress: {
       di: 0,
       do: 0,
       ai: 512,
       ao: 512,
+      drive: 1000,
+      node: 1,
+      iosubsys: 100,
     },
     hardwareInfo: {},
+    driveInfo: {},
     logs: [],
   },
   mutations: {
-    SET_FILE_PATH(state, filePath) {
+    SET_IOFILE_PATH(state, filePath) {
       if (filePath) state.ioFilePath = filePath;
+    },
+    SET_DRIVEFILE_PATH(state, filePath) {
+      if (filePath) state.driveFilePath = filePath;
     },
     ASSIGN_COLUMN(state, [column, header]: string[]) {
       if (
@@ -83,9 +85,12 @@ export const store = createStore<State>({
         column === "rack" ||
         column === "slot" ||
         column === "channel" ||
-        column === "ioType"
+        column === "ipAddress" ||
+        column === "ioType" ||
+        column === "driveType" ||
+        column === "ampRating"
       ) {
-        state.ioColumnNames[column] = header;
+        state.columnNames[column] = header;
       }
     },
     SET_HEADERS(state, headers: string[]) {
@@ -95,22 +100,37 @@ export const store = createStore<State>({
     },
     SET_TYPE_IDENTIFIERS(state, [ioType, identifiers]) {
       if (ioType === "DI") {
-        state.ioTypeIdentifiers.di = identifiers;
+        state.typeIdentifiers.di = identifiers;
       }
       if (ioType === "DO") {
-        state.ioTypeIdentifiers.do = identifiers;
+        state.typeIdentifiers.do = identifiers;
       }
       if (ioType === "AI") {
-        state.ioTypeIdentifiers.ai = identifiers;
+        state.typeIdentifiers.ai = identifiers;
       }
       if (ioType === "AO") {
-        state.ioTypeIdentifiers.ao = identifiers;
+        state.typeIdentifiers.ao = identifiers;
+      }
+      if (ioType === "VFD") {
+        state.typeIdentifiers.vfd = identifiers;
+      }
+      if (ioType === "FVNR") {
+        state.typeIdentifiers.fvnr = identifiers;
+      }
+      if (ioType === "FVR") {
+        state.typeIdentifiers.fvr = identifiers;
       }
     },
     SET_HARDWARE_INFO(state, hardwareInfo: {}) {
       state.hardwareInfo = hardwareInfo;
     },
-    SET_START_ADDRESSES(state, addresses: {}) {
+    SET_DRIVE_INFO(state, driveInfo: {}) {
+      state.driveInfo = driveInfo;
+    },
+    SET_INDIVIDUAL_ADDRESS(state, [type, address]) {
+      state.startAddress[type] = address;
+    },
+    SET_START_ADDRESSES(state, addresses) {
       state.startAddress = addresses;
     },
     SET_LOGS(state, logs: any) {
@@ -118,8 +138,11 @@ export const store = createStore<State>({
     },
   },
   actions: {
-    setFilePath({ commit }, filePath) {
-      commit("SET_FILE_PATH", filePath);
+    setIoFilePath({ commit }, filePath) {
+      commit("SET_IOFILE_PATH", filePath);
+    },
+    setDriveFilePath({ commit }, filePath) {
+      commit("SET_DRIVEFILE_PATH", filePath);
     },
     assignColumnHeader({ commit }, [column, header]) {
       commit("ASSIGN_COLUMN", [column, header]);
@@ -133,8 +156,14 @@ export const store = createStore<State>({
     setHardwareInfo({ commit }, hardwareInfo) {
       commit("SET_HARDWARE_INFO", hardwareInfo);
     },
-    setStartAddresses({ commit }, groupedAddresses) {
-      commit("SET_START_ADDRESSES", groupedAddresses);
+    setDriveInfo({ commit }, driveInfo) {
+      commit("SET_DRIVE_INFO", driveInfo);
+    },
+    setIndividualAddress({ commit }, [type, address]) {
+      commit("SET_INDIVIDUAL_ADDRESS", [type, address]);
+    },
+    setStartAddresses({ commit }, groupAddresses) {
+      commit("SET_START_ADDRESSES", groupAddresses);
     },
     setLogs({ commit }, logs) {
       commit("SET_LOGS", logs);
