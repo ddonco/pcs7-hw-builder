@@ -232,7 +232,7 @@ export function parseDrives(
     let description: string = dfArray[row][columnNames.description];
     let ipAddress: string = dfArray[row][columnNames.ipAddress];
     let driveType: string = dfArray[row][columnNames.driveType];
-    let ampRating: number = parseInt(dfArray[row][columnNames.ampRating], 10);
+    let ampRating: number = parseFloat(dfArray[row][columnNames.ampRating]);
     ipAddressArr = [];
 
     if (description === "undefined" || typeof description === "undefined") {
@@ -240,6 +240,8 @@ export function parseDrives(
     }
     if (ampRating == 0 || typeof ampRating === "undefined") {
       ampRating = 50;
+    } else {
+      ampRating *= 100;
     }
 
     if (

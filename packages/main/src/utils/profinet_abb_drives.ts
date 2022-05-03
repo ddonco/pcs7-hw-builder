@@ -470,7 +470,7 @@ END\n`;
 
 export function buildACSVFD(drive: ABBVFD): string {
   const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "${drive.name}"\n`;
-  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "FENA"\n`;
+  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "${drive.name}"\n`;
   const slot0X1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "Interface"\n`;
   const slot0X1P1RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 1"\n`;
   const slot0X1P2RHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>", "Port 2"\n`;
