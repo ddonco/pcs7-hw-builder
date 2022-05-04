@@ -133,7 +133,7 @@ export function buildDrivesConfig(
   let csvFilePath = outFilePath.split(".").slice(0, -1).join(".") + ".csv";
   let csvStream = fs.createWriteStream(csvFilePath);
   let buildString: string = "";
-  let buildCsvString: string = "name,node,address,subsystem,type\n";
+  let buildCsvString: string = "name,node,address,subsystem,ipaddress,type\n";
   csvStream.write(buildCsvString);
 
   for (const node in drives) {
@@ -142,7 +142,11 @@ export function buildDrivesConfig(
     } else if (drives[node].type === "FVNR" || drives[node].type === "FVR") {
       buildString = buildUMC100(drives[node]);
     }
-    buildCsvString = `${drives[node].name},${drives[node].nodeAddress},${drives[node].startAddress},${drives[node].ioSubSystem},${drives[node].type}\n`;
+    buildCsvString = `${drives[node].name},${drives[node].nodeAddress},${
+      drives[node].startAddress
+    },${drives[node].ioSubSystem},${drives[node].ipAddress.join(".")},${
+      drives[node].type
+    }\n`;
     writeStream.write(buildString);
     csvStream.write(buildCsvString);
   }

@@ -11,6 +11,7 @@ export interface State {
     slot: string;
     channel: string;
     ipAddress: string;
+    nodeAddress: string;
     ioType: string;
     driveType: string;
     ampRating: string;
@@ -44,6 +45,7 @@ export const store = createStore<State>({
       slot: "",
       channel: "",
       ipAddress: "",
+      nodeAddress: "",
       ioType: "",
       driveType: "",
       ampRating: "",
@@ -86,6 +88,7 @@ export const store = createStore<State>({
         column === "slot" ||
         column === "channel" ||
         column === "ipAddress" ||
+        column === "nodeAddress" ||
         column === "ioType" ||
         column === "driveType" ||
         column === "ampRating"

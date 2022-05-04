@@ -266,8 +266,8 @@ LOCAL_IN_ADDRESSES
 LOCAL_OUT_ADDRESSES 
   ADDRESS  ${drive.startAddress}, 0, 12, 0, 0, 0
 PARAMETER 
-  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${drive.currentRating * 100}"
-  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${drive.currentRating * 100}"
+  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${drive.currentRating}"
+  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${drive.currentRating}"
   "UMC100_YD_STARTING_TIME PRDIndex 0 DataID 64", "600"
   "UMC100_CURRENT_FACTOR PRDIndex 0 DataID 80", "100"
   "UMC100_COOLING_TIME PRDIndex 0 DataID 96", "120"

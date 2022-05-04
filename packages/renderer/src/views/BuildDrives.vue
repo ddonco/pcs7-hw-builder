@@ -140,6 +140,10 @@ export default {
                 :columnId="'ipAddress'"
               />
               <ColumnNameConfig
+                :columnName="'Node Address'"
+                :columnId="'nodeAddress'"
+              />
+              <ColumnNameConfig
                 :columnName="'Drive Type'"
                 :columnId="'driveType'"
               />
@@ -164,7 +168,7 @@ export default {
               Enter comma separated list of Drive type identifiers.
             </p>
             <IOTypeIdentifier :ioType="'VFD'" :examples="'VFD,VFD FS'" />
-            <IOTypeIdentifier :ioType="'FVRN'" :examples="'FVRN'" />
+            <IOTypeIdentifier :ioType="'FVNR'" :examples="'FVNR'" />
             <IOTypeIdentifier :ioType="'FVR'" :examples="'FVR'" />
           </div>
         </div>

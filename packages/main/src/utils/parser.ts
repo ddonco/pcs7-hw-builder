@@ -71,7 +71,7 @@ export function parseAssignedIO(
     aoTotalBytes: 0,
   };
 
-  for (let row = 1; row < dfArray.length; row++) {
+  for (let row = 0; row < dfArray.length; row++) {
     let rack: number = parseInt(dfArray[row][ioColumnNames.rack], 10);
     let slot: number = parseInt(dfArray[row][ioColumnNames.slot], 10);
     let channel: number = parseInt(dfArray[row][ioColumnNames.channel], 10);
@@ -119,6 +119,18 @@ export function parseAssignedIO(
       channelType = "AI";
     } else if (ioTypeIdentifier.ao.indexOf(channelType) > -1) {
       channelType = "AO";
+    } else {
+      childLogger.error(
+        `IO type not recognized, point will be skipped, row ${row}`,
+        {
+          tagName: tagName,
+          channelType: channelType,
+          rack: rack,
+          slot: slot,
+          channel: channel,
+        }
+      );
+      continue;
     }
 
     try {
@@ -216,6 +228,7 @@ export function parseDrives(
 
   let drives: { [node: string]: {} } = {};
   let driveModule: {};
+  let nodeAddress: number = 0;
   let currentNode: number;
   let ipAddressArr: number[];
   let addressLookup: { [component: string]: number } = {
@@ -227,7 +240,7 @@ export function parseDrives(
   };
 
   let dfArray = df.toArray();
-  for (let row = 1; row < dfArray.length; row++) {
+  for (let row = 0; row < dfArray.length; row++) {
     let tagName: string = dfArray[row][columnNames.tagName];
     let description: string = dfArray[row][columnNames.description];
     let ipAddress: string = dfArray[row][columnNames.ipAddress];
@@ -235,13 +248,21 @@ export function parseDrives(
     let ampRating: number = parseFloat(dfArray[row][columnNames.ampRating]);
     ipAddressArr = [];
 
+    if (columnNames.nodeAddress !== "") {
+      nodeAddress = parseInt(dfArray[row][columnNames.nodeAddress], 10);
+    }
+
     if (description === "undefined" || typeof description === "undefined") {
       description = "";
     }
-    if (ampRating == 0 || typeof ampRating === "undefined") {
+    if (
+      ampRating == 0 ||
+      typeof ampRating === "undefined" ||
+      isNaN(ampRating)
+    ) {
       ampRating = 50;
     } else {
-      ampRating *= 100;
+      ampRating = Math.round(ampRating * 10) * 10;
     }
 
     if (
@@ -257,6 +278,7 @@ export function parseDrives(
           tagName: String(tagName),
           description: String(description),
           ipAddress: String(ipAddress),
+          nodeAddress: String(ipAddress),
           driveType: String(driveType),
           ampRating: String(ampRating),
         }
@@ -274,16 +296,31 @@ export function parseDrives(
       driveType = "FVNR";
     } else if (typeIdentifier.fvr.indexOf(driveType) > -1) {
       driveType = "FVR";
+    } else {
+      childLogger.error(
+        `drive type not recognized - drive will be skipped, row ${row}`,
+        {
+          tagName: tagName,
+          driveType: driveType,
+          ampRating: ampRating,
+        }
+      );
+      continue;
     }
 
     try {
-      currentNode = addressLookup.nextNodeAddress;
+      if (nodeAddress > 0) {
+        currentNode = nodeAddress;
+      } else {
+        currentNode = addressLookup.nextNodeAddress;
+      }
       [driveModule, addressLookup] = buildDrive(
         tagName,
         driveType,
         ampRating,
         addressLookup,
-        ipAddressArr
+        ipAddressArr,
+        currentNode
       );
       drives[currentNode] = driveModule;
     } catch (error) {
@@ -304,7 +341,7 @@ function buildModule(
   moduleType: string
 ): [any, { [type: string]: number }] {
   if (moduleType === DI_MODULE) {
-    let hwModule = new DI_6DL11316BH000PH1(
+    const hwModule = new DI_6DL11316BH000PH1(
       addressLookup["nextDigitalAddress"],
       rack,
       slot
@@ -316,7 +353,7 @@ function buildModule(
   }
 
   if (moduleType === DO_MODULE) {
-    let hwModule = new DO_6DL11326BH000PH1(
+    const hwModule = new DO_6DL11326BH000PH1(
       addressLookup["nextDigitalAddress"],
       rack,
       slot
@@ -328,7 +365,7 @@ function buildModule(
   }
 
   if (moduleType === AI_MODULE) {
-    let hwModule = new AI_6DL11346TH000PH1(
+    const hwModule = new AI_6DL11346TH000PH1(
       addressLookup["nextAnalogAddress"],
       rack,
       slot
@@ -340,7 +377,7 @@ function buildModule(
   }
 
   if (moduleType === AO_MODULE) {
-    let hwModule = new AO_6DL11356TF000PH1(
+    const hwModule = new AO_6DL11356TF000PH1(
       addressLookup["nextAnalogAddress"],
       rack,
       slot
@@ -368,12 +405,20 @@ function buildDrive(
   driveType: string,
   ampRating: number,
   addressLookup: { [type: string]: number },
-  ipAddress: number[]
+  ipAddress: number[],
+  nodeAddress: number
 ): [any, { [type: string]: number }] {
+  let nextNodeAddress: number = 0;
+  if (nodeAddress > 0) {
+    nextNodeAddress = nodeAddress;
+  } else {
+    nextNodeAddress = addressLookup.nextNodeAddress;
+  }
+
   if (driveType === VFD_MODULE) {
-    let driveModule = new ABBVFD(
+    const driveModule = new ABBVFD(
       tagName,
-      addressLookup.nextNodeAddress,
+      nextNodeAddress,
       addressLookup.ioSubSystem,
       addressLookup.nextDriveAddress,
       ipAddress
@@ -383,9 +428,9 @@ function buildDrive(
     return [driveModule, addressLookup];
   }
   if (driveType === FVNR_MODULE || driveType === FVR_MODULE) {
-    let driveModule = new ABBUMC100(
+    const driveModule = new ABBUMC100(
       tagName,
-      addressLookup.nextNodeAddress,
+      nextNodeAddress,
       addressLookup.ioSubSystem,
       addressLookup.nextDriveAddress,
       ipAddress,
