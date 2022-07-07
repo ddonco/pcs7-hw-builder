@@ -28,7 +28,7 @@ export function parseHeaders(ioFilePath: string): string[] {
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
   const data: any = worksheet[0]["data"];
 
-  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  const headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
   return headers;
 }
 
@@ -36,7 +36,7 @@ export function parseAssignedIO(
   ioFilePath: string,
   ioColumnNames: { [columnName: string]: string },
   ioTypeIdentifier: { [ioType: string]: string[] },
-  channelZeroStart: boolean = false
+  channelZeroStart = false
 ): [
   {
     [rack: string]: { [slot: string]: any };
@@ -46,7 +46,7 @@ export function parseAssignedIO(
   const worksheet = xlsx.parse(fs.readFileSync(ioFilePath));
   const data: any = worksheet[0]["data"];
 
-  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  const headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
   let df = new DataFrame({
     columnNames: headers,
     rows: data.slice(1, data.length),
@@ -54,7 +54,7 @@ export function parseAssignedIO(
 
   df = df.orderBy((row: any) => row[ioColumnNames.channel]);
   df = df.orderBy((row: any) => row[ioColumnNames.slot]);
-  let dfArray = df.orderBy((row: any) => row[ioColumnNames.rack]).toArray();
+  const dfArray = df.orderBy((row: any) => row[ioColumnNames.rack]).toArray();
 
   let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
   let hwModule: any;
@@ -220,8 +220,8 @@ export function parseDrives(
   const worksheet = xlsx.parse(fs.readFileSync(driveFilePath));
   const data: any = worksheet[0]["data"];
 
-  let headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
-  let df = new DataFrame({
+  const headers = Array.from(data[0], (v: any) => (v === undefined ? "" : v));
+  const df = new DataFrame({
     columnNames: headers,
     rows: data.slice(1, data.length),
   });
@@ -239,7 +239,7 @@ export function parseDrives(
     driveTotalBytes: 0,
   };
 
-  let dfArray = df.toArray();
+  const dfArray = df.toArray();
   for (let row = 0; row < dfArray.length; row++) {
     let tagName: string = dfArray[row][columnNames.tagName];
     let description: string = dfArray[row][columnNames.description];
