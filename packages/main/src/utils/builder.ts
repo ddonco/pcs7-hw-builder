@@ -18,9 +18,13 @@ export function buildHWConfig(
   },
   hardwareInfo: { [type: string]: number },
   ioStartAddress: { [moduleType: string]: string } = {},
-  groupIoTypes: boolean = false
+  groupIoTypes: boolean = false,
+  buildOptions: { [type: string]: any }
 ): any {
   const sortedHW = sortHW(hardwareRacks);
+  const enableAllChannels = buildOptions["enableAllChannels"];
+  const analogPIP = buildOptions["analogPIP"];
+  const digitalPIP = buildOptions["digitalPIP"];
 
   // Parse addresses from strings to ints
   let ioStartAddressParsed: { [moduleType: string]: number } = {};
@@ -71,7 +75,9 @@ export function buildHWConfig(
           addressedHW[rack][slot].description,
           addressedHW[rack][slot].startAddress,
           addressedHW[rack][slot].totalInBytes,
-          addressedHW[rack][slot].channels
+          addressedHW[rack][slot].channels,
+          enableAllChannels,
+          digitalPIP
         );
       } else if (addressedHW[rack][slot].type === "DO") {
         buildString = buildDOConfig(
@@ -83,7 +89,9 @@ export function buildHWConfig(
           addressedHW[rack][slot].startAddress,
           addressedHW[rack][slot].totalInBytes,
           addressedHW[rack][slot].totalOutBytes,
-          addressedHW[rack][slot].channels
+          addressedHW[rack][slot].channels,
+          enableAllChannels,
+          digitalPIP
         );
       } else if (addressedHW[rack][slot].type === "AI") {
         buildString = buildAIConfig(
@@ -95,7 +103,9 @@ export function buildHWConfig(
           addressedHW[rack][slot].startAddress,
           addressedHW[rack][slot].totalInBytes,
           addressedHW[rack][slot].hartModulePartNumber,
-          addressedHW[rack][slot].channels
+          addressedHW[rack][slot].channels,
+          enableAllChannels,
+          analogPIP
         );
       } else if (addressedHW[rack][slot].type === "AO") {
         buildString = buildAOConfig(
@@ -109,7 +119,9 @@ export function buildHWConfig(
           addressedHW[rack][slot].totalInBytes,
           addressedHW[rack][slot].totalOutBytes,
           addressedHW[rack][slot].hartModulePartNumber,
-          addressedHW[rack][slot].channels
+          addressedHW[rack][slot].channels,
+          enableAllChannels,
+          analogPIP
         );
       }
       writeStream.write(buildString);
@@ -127,8 +139,10 @@ export function buildDrivesConfig(
   outFilePath: string,
   drives: {
     [node: string]: any;
-  }
+  },
+  buildOptions: { [type: string]: any }
 ): any {
+  const drivePIP = buildOptions["drivePIP"];
   let writeStream = fs.createWriteStream(outFilePath);
   let csvFilePath = outFilePath.split(".").slice(0, -1).join(".") + ".csv";
   let csvStream = fs.createWriteStream(csvFilePath);
@@ -138,9 +152,9 @@ export function buildDrivesConfig(
 
   for (const node in drives) {
     if (drives[node].type === "VFD") {
-      buildString = buildACSVFD(drives[node]);
+      buildString = buildACSVFD(drives[node], drivePIP);
     } else if (drives[node].type === "FVNR" || drives[node].type === "FVR") {
-      buildString = buildUMC100(drives[node]);
+      buildString = buildUMC100(drives[node], drivePIP);
     }
     buildCsvString = `${drives[node].name},${drives[node].nodeAddress},${
       drives[node].startAddress

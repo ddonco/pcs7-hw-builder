@@ -3,6 +3,7 @@ import { defineComponent } from "vue";
 import ColumnNameConfig from "/@/components/ColumnNameConfig.vue";
 import IOTypeIdentifier from "/@/components/IOTypeIdentifier.vue";
 import IOAddressStart from "../components/IOAddressStart.vue";
+import ProcImagePartition from "../components/ProcImagePartition.vue";
 import { useStore } from "/@/store/index";
 
 export default defineComponent({
@@ -11,6 +12,7 @@ export default defineComponent({
     ColumnNameConfig,
     IOTypeIdentifier,
     IOAddressStart,
+    ProcImagePartition,
   },
   setup() {
     const store = useStore();
@@ -65,10 +67,15 @@ export default defineComponent({
       store.dispatch("setStartAddresses", groupedAddresses);
     };
 
+    const setEnableChannels = (enable: boolean) => {
+      store.dispatch("setEnableAllChannels", enable);
+    };
+
     const generateHwConfig = (event: any) => {
       if (Object.keys(store.state.hardwareInfo).length > 0) {
         window.api.send("toMain", {
           generateHwConfig: JSON.stringify(store.state.startAddress),
+          buildOptions: JSON.stringify(""),
         });
       }
     };
@@ -77,6 +84,7 @@ export default defineComponent({
       parseHeaders,
       parseAssignedIO,
       getGroupedAddresses,
+      setEnableChannels,
       generateHwConfig,
       ioFilePath: "",
     };
@@ -95,6 +103,10 @@ export default defineComponent({
     groupIOAddressChange: function (event: any) {
       let grouped = event.target.checked;
       this.getGroupedAddresses(grouped);
+    },
+    enableAllChannels: function (event: any) {
+      let enable = event.target.checked;
+      this.setEnableChannels(enable);
     },
   },
 });
@@ -125,7 +137,7 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex pl-2 bg-purple-50">
-      <div class="text-3xl self-center">2.</div>
+      <div class="text-3xl self-start">2.</div>
       <div class="w-full">
         <div class="flex flex-row pt-2 pl-2">
           <div
@@ -184,7 +196,7 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex pl-2 bg-purple-100">
-      <div class="text-3xl self-center">3.</div>
+      <div class="text-3xl self-start">3.</div>
       <div class="flex flex-row w-full pt-2 pb-2 pl-2 cursor-default">
         <div
           class="w-full divide-y divide-gray-500 cursor-default font-semibold"
@@ -205,7 +217,7 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex pl-2 bg-purple-200">
-      <div class="text-3xl self-center">4.</div>
+      <div class="text-3xl self-start">4.</div>
       <div>
         <div class="flex flex-row w-full pt-2 pl-2 cursor-default">
           <div
@@ -224,7 +236,7 @@ export default defineComponent({
             </p>
             <div class="flex items-center text-sm">
               <div class="pr-2">Group I/O Addresses by Type</div>
-              <div>
+              <div class="flex items-center">
                 <input
                   type="checkbox"
                   class="checked:bg-blue-500"
@@ -241,13 +253,25 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex pl-2 bg-purple-300">
-      <div class="text-3xl self-center">5.</div>
+      <div class="text-3xl self-start">5.</div>
       <div class="flex flex-row w-full pt-2 pb-2 pl-2 cursor-default">
         <div
           class="w-full divide-y divide-gray-500 cursor-default font-semibold"
         >
           <div>Generate HW Config</div>
           <div>
+            <div class="flex items-center pt-2 text-sm font-normal">
+              <div class="pr-2">Enable All Channels</div>
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  class="checked:bg-blue-500"
+                  v-on:change="enableAllChannels"
+                />
+              </div>
+            </div>
+            <ProcImagePartition :pipType="'Digital'" />
+            <ProcImagePartition :pipType="'Analog'" />
             <div class="pt-4 w-full text-center">
               <button
                 type="button"

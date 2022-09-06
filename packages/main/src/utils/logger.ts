@@ -11,6 +11,10 @@ export const hwBuilderLogger = winston.createLogger({
   transports: [
     new winston.transports.File({
       filename: "logs/hw_builder.log",
+      format: winston.format.combine(
+        winston.format.json(),
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
+      ),
       options: {
         flags: "w",
       },

@@ -29,6 +29,8 @@ export interface State {
   startAddress: { [type: string]: number };
   hardwareInfo: { [type: string]: number };
   driveInfo: { [type: string]: number };
+  enableAllChannels: boolean;
+  pips: { [type: string]: number };
   logs: string[];
 }
 
@@ -71,6 +73,12 @@ export const store = createStore<State>({
     },
     hardwareInfo: {},
     driveInfo: {},
+    enableAllChannels: false,
+    pips: {
+      analogPIP: 3,
+      digitalPIP: 4,
+      drivePIP: 4,
+    },
     logs: [],
   },
   mutations: {
@@ -136,6 +144,12 @@ export const store = createStore<State>({
     SET_START_ADDRESSES(state, addresses) {
       state.startAddress = addresses;
     },
+    SET_ENABLE_ALL_CHANNELS(state, enableAllChannels) {
+      state.enableAllChannels = enableAllChannels;
+    },
+    SET_PIP(state, [pip, value]) {
+      state.pips[pip] = value;
+    },
     SET_LOGS(state, logs: any) {
       state.logs = logs["logs"];
     },
@@ -167,6 +181,12 @@ export const store = createStore<State>({
     },
     setStartAddresses({ commit }, groupAddresses) {
       commit("SET_START_ADDRESSES", groupAddresses);
+    },
+    setEnableAllChannels({ commit }, enableAllChannels) {
+      commit("SET_ENABLE_ALL_CHANNELS", enableAllChannels);
+    },
+    setPIP({ commit }, [pip, value]) {
+      commit("SET_PIP", [pip, value]);
     },
     setLogs({ commit }, logs) {
       commit("SET_LOGS", logs);

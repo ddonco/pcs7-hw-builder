@@ -49,7 +49,9 @@ export function buildAIConfig(
   moduleAddress: number,
   moduleBytesSize: number,
   hartModuleType: string,
-  channels: Channel[]
+  channels: Channel[],
+  enableAllChannels: boolean,
+  pip: number
 ): string {
   let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
@@ -58,9 +60,9 @@ export function buildAIConfig(
   )}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
-    ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, 0, 0, 32\n`;
+    ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, ${pip}, 0, 32\n`;
   let symbols = buildSymbols("AI", channels);
-  let diagnostics = buildAIDiagnostics(channels);
+  let diagnostics = buildAIDiagnostics(channels, enableAllChannels);
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   let hartModules = buildHartConfig(
@@ -83,7 +85,9 @@ export function buildAOConfig(
   moduleInBytesSize: number,
   moduleOutBytesSize: number,
   hartModuleType: string,
-  channels: Channel[]
+  channels: Channel[],
+  enableAllChannels: boolean,
+  pip: number
 ): string {
   let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
@@ -92,11 +96,11 @@ export function buildAOConfig(
   )}, "${modulePartNo}" "V${moduleVersion}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
-    ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, 0, 0, 32
+    ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, ${pip}, 0, 32
   LOCAL_OUT_ADDRESSES
-    ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, 0, 0, 32\n`;
+    ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, ${pip}, 0, 32\n`;
   let symbols = buildSymbols("AO", channels);
-  let diagnostics = buildAODiagnostics(channels);
+  let diagnostics = buildAODiagnostics(channels, enableAllChannels);
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   let hartModules = buildHartConfig(
@@ -115,21 +119,23 @@ export function buildDIConfig(
   moduleName: string,
   moduleAddress: number,
   moduleBytesSize: number,
-  channels: Channel[]
+  channels: Channel[],
+  enableAllChannels: boolean,
+  pip: number
 ): string {
   let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
-    ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, 0, 0, 16\n`;
+    ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, ${pip}, 0, 16\n`;
   let symbols = buildSymbols("DI", channels);
 
   let diagnostics: string;
   if (channels.length == 8) {
-    diagnostics = buildDI8Diagnostics(channels);
+    diagnostics = buildDI8Diagnostics(channels, enableAllChannels);
   } else {
-    diagnostics = buildDI16Diagnostics(channels);
+    diagnostics = buildDI16Diagnostics(channels, enableAllChannels);
   }
 
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
@@ -146,18 +152,20 @@ export function buildDOConfig(
   moduleOutAddress: number,
   moduleInBytesSize: number,
   moduleOutBytesSize: number,
-  channels: Channel[]
+  channels: Channel[],
+  enableAllChannels: boolean,
+  pip: number
 ): string {
   let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
-    ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, 0, 0, 16
+    ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, ${pip}, 0, 16
   LOCAL_OUT_ADDRESSES
-    ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, 0, 0, 16\n`;
+    ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, ${pip}, 0, 16\n`;
   let symbols = buildSymbols("DO", channels);
-  let diagnostics = buildDODiagnostics(channels);
+  let diagnostics = buildDODiagnostics(channels, enableAllChannels);
   let end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   return begin + symbols + diagnostics + end;

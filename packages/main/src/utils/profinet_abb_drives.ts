@@ -1,6 +1,6 @@
 import { ABBUMC100, ABBVFD } from "./drive_module";
 
-export function buildUMC100(drive: ABBUMC100): string {
+export function buildUMC100(drive: ABBUMC100, drivePIP: number): string {
   const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${drive.name}"\n`;
   const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${drive.name}"\n`;
   const slot0X1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "PN-IO"\n`;
@@ -262,14 +262,16 @@ BEGIN
   COMMENT ""
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
-  ADDRESS  ${drive.startAddress}, 0, 16, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 16, ${drivePIP}, 0, 0
 LOCAL_OUT_ADDRESSES 
-  ADDRESS  ${drive.startAddress}, 0, 12, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 12, ${drivePIP}, 0, 0
 PARAMETER 
   "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${drive.currentRating}"
   "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${drive.currentRating}"
   "UMC100_YD_STARTING_TIME PRDIndex 0 DataID 64", "600"
-  "UMC100_CURRENT_FACTOR PRDIndex 0 DataID 80", "100"
+  "UMC100_CURRENT_FACTOR PRDIndex 0 DataID 80", "${
+    drive.currentRating > 60 ? 4620 : 100
+  }"
   "UMC100_COOLING_TIME PRDIndex 0 DataID 96", "120"
   "UMC100_Earth_Flt_Trip_Level PRDIndex 0 DataID 112", "255"
   "UMC100_Earth_Flt_Trip_Delay PRDIndex 0 DataID 120", "5"
@@ -305,7 +307,7 @@ PARAMETER
   "UMC100_Emergency_Start PRDIndex 0 DataID 313", "ENUM_ENTRY_Off"
   "UMC100_Earth_Flt_Detection PRDIndex 0 DataID 314", "ENUM_ENTRY_UMC100_EARTH_FAULT_AFTER_STARTUP"
   "UMC100_Address_Check PRDIndex 0 DataID 315", "ENUM_ENTRY_Off"
-  "UMC100_Enable_Custom_Logic PRDIndex 0 DataID 316", "ENUM_ENTRY_NO"
+  "UMC100_Enable_Custom_Logic PRDIndex 0 DataID 316", "ENUM_ENTRY_YES"
   "UMC100_YD_CHANGE_OVER_MODE PRDIndex 0 DataID 317", "ENUM_ENTRY_UMC100_YD_CHANGE_OVER_MODE_CURRENT"
   "UMC100_PHASE_LOSS_PROT PRDIndex 0 DataID 318", "ENUM_ENTRY_On"
   "UMC100_Resistive_Load PRDIndex 0 DataID 319", "ENUM_ENTRY_NO"
@@ -468,7 +470,7 @@ END\n`;
   );
 }
 
-export function buildACSVFD(drive: ABBVFD): string {
+export function buildACSVFD(drive: ABBVFD, drivePIP: number): string {
   const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.4-ABB-FPNO-20201118.xml<FPNO_DAP_V6>", "${drive.name}"\n`;
   const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.4-ABB-FPNO-20201118.xml<FPNO_DAP_V6>", "${drive.name}"\n`;
   const slot0X1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "Interface"\n`;
@@ -713,9 +715,9 @@ END\n`;
   COMMENT ""
   IRT_GROUP_NR "1"
 LOCAL_IN_ADDRESSES 
-  ADDRESS  ${drive.startAddress}, 0, 20, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 20, ${drivePIP}, 0, 0
 LOCAL_OUT_ADDRESSES 
-  ADDRESS  ${drive.startAddress}, 0, 20, 0, 0, 0
+  ADDRESS  ${drive.startAddress}, 0, 20, ${drivePIP}, 0, 0
 PARAMETER 
   "T_ID_STOP_ACTION_VALUE_SEL PRDIndex 1 DataID 0", "T_ID_STOP_ACTION_STOP"
   "T_ID_CONTROL_ZERO_MODE_VALUE_SEL PRDIndex 1 DataID 8", "T_ID_CONTROL_ZERO_USE"

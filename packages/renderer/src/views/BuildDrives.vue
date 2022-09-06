@@ -3,6 +3,7 @@ import { useStore } from "/@/store/index";
 import ColumnNameConfig from "/@/components/ColumnNameConfig.vue";
 import IOTypeIdentifier from "/@/components/IOTypeIdentifier.vue";
 import IOAddressStart from "../components/IOAddressStart.vue";
+import ProcImagePartition from "../components/ProcImagePartition.vue";
 
 export default {
   name: "BuildDrives",
@@ -10,6 +11,7 @@ export default {
     ColumnNameConfig,
     IOTypeIdentifier,
     IOAddressStart,
+    ProcImagePartition,
   },
   setup() {
     const store = useStore();
@@ -118,7 +120,7 @@ export default {
       </div>
     </div>
     <div class="flex pl-2 bg-emerald-50">
-      <div class="text-3xl self-center">2.</div>
+      <div class="text-3xl self-start">2.</div>
       <div class="w-full">
         <div class="flex flex-row pt-2 pl-2">
           <div
@@ -175,7 +177,7 @@ export default {
       </div>
     </div>
     <div class="flex pl-2 bg-emerald-100">
-      <div class="text-3xl self-center">3.</div>
+      <div class="text-3xl self-start">3.</div>
       <div>
         <div class="flex flex-row w-full pt-2 pl-2 cursor-default">
           <div
@@ -198,13 +200,14 @@ export default {
       </div>
     </div>
     <div class="flex pl-2 bg-emerald-200">
-      <div class="text-3xl self-center">4.</div>
+      <div class="text-3xl self-start">4.</div>
       <div class="flex flex-row w-full pt-2 pb-2 pl-2 cursor-default">
         <div
           class="w-full divide-y divide-gray-500 cursor-default font-semibold"
         >
           <div>Generate Drives HW Config</div>
           <div>
+            <ProcImagePartition :pipType="'Drive'" />
             <div class="pt-4 w-full text-center">
               <button
                 type="button"

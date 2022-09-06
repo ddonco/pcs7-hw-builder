@@ -19,6 +19,13 @@ export default defineComponent({
       identifierChange,
     };
   },
+  // computed: {
+  //   identifier: function () {
+  //     const store = useStore();
+  //     let identifiers = store.state.typeIdentifiers;
+  //     return identifiers[String(this.ioType).toLowerCase()];
+  //   },
+  // },
 });
 </script>
 

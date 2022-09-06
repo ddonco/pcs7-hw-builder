@@ -31,6 +31,12 @@ let args: { [prop: string]: any } = {};
 let groupIOAddresses = true;
 let userAddressParams: { [ioType: string]: string } = {};
 let startIpAddress: string;
+let buildOptions: { [option: string]: any } = {
+  enableAllChannels: false,
+  analogPIP: 3,
+  digitalPIP: 4,
+  drivePIP: 4,
+};
 
 const logFile = "logs/hw_builder.log";
 
@@ -154,6 +160,7 @@ ipcMain.on("toMain", (event, args) => {
 
   if ("generateHwConfig" in args) {
     userAddressParams = JSON.parse(args["generateHwConfig"]);
+    buildOptions = JSON.parse(args["buildOptions"]);
     dialog
       .showSaveDialog({
         title: "HWConfig Save Location",
@@ -167,7 +174,8 @@ ipcMain.on("toMain", (event, args) => {
             hardwareRacks,
             hardwareInfo,
             userAddressParams,
-            groupIOAddresses
+            groupIOAddresses,
+            buildOptions
           );
         }
       })
@@ -203,7 +211,11 @@ ipcMain.on("toMain", (event, args) => {
       })
       .then((result) => {
         if (String(result.filePath).length > 0) {
-          sortedRacks = buildDrivesConfig(String(result.filePath), drives);
+          sortedRacks = buildDrivesConfig(
+            String(result.filePath),
+            drives,
+            buildOptions
+          );
         }
       })
       .catch((err) => {

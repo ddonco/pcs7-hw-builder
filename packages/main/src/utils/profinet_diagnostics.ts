@@ -1,6 +1,9 @@
 import { Channel } from "./hw_module";
 
-export function buildAIDiagnostics(channels: Channel[]): string {
+export function buildAIDiagnostics(
+  channels: Channel[],
+  enableAllChannels: boolean
+): string {
   const staticBeginString = `PARAMETER 
   VERSION_HIGH, "0"
   VERSION_LOW, "0"
@@ -16,102 +19,7 @@ export function buildAIDiagnostics(channels: Channel[]): string {
   NUMBER_OF_FOLLOWING_CHANNEL_PARAMETER_BLOCKS, "16"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "14"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
-  const staticEndString = `  MEASURING_RANGE, AI , 0, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 1, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 2, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 3, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 4, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 5, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 6, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 7, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 8, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 9, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 10, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 11, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 12, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 13, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 14, "4_TO_20_MA_HART"
-  MEASURING_RANGE, AI , 15, "4_TO_20_MA_HART"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 0, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 1, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 2, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 3, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 4, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 5, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 6, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 7, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 8, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 9, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 10, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 11, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 12, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 13, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 14, "1"
-  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , 15, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 0, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 1, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 2, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 3, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 4, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 5, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 6, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 7, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 8, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 9, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 10, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 11, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 12, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 13, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 14, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , 15, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 0, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 1, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 2, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 3, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 4, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 5, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 6, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 7, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 8, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 9, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 10, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 11, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 12, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 13, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 14, "1"
-  DIAGNOSTICS_WIRE_BREAK, AI , 15, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 0, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 1, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 2, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 3, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 4, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 5, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 6, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 7, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 8, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 9, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 10, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 11, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 12, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 13, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 14, "1"
-  DIAGNOSTICS_UNDERFLOW, AI , 15, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 0, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 1, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 2, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 3, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 4, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 5, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 6, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 7, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 8, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 9, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 10, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 11, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 12, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 13, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 14, "1"
-  DIAGNOSTICS_OVERFLOW, AI , 15, "1"
+  const staticEndString = `
   SMOOTHING, AI , 0, "NONE"
   SMOOTHING, AI , 1, "NONE"
   SMOOTHING, AI , 2, "NONE"
@@ -144,22 +52,6 @@ export function buildAIDiagnostics(channels: Channel[]): string {
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 13, "10_HZ"
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 14, "10_HZ"
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 15, "10_HZ"
-  DIAGNOSTICS_HART, AI , 0, "1"
-  DIAGNOSTICS_HART, AI , 1, "1"
-  DIAGNOSTICS_HART, AI , 2, "1"
-  DIAGNOSTICS_HART, AI , 3, "1"
-  DIAGNOSTICS_HART, AI , 4, "1"
-  DIAGNOSTICS_HART, AI , 5, "1"
-  DIAGNOSTICS_HART, AI , 6, "1"
-  DIAGNOSTICS_HART, AI , 7, "1"
-  DIAGNOSTICS_HART, AI , 8, "1"
-  DIAGNOSTICS_HART, AI , 9, "1"
-  DIAGNOSTICS_HART, AI , 10, "1"
-  DIAGNOSTICS_HART, AI , 11, "1"
-  DIAGNOSTICS_HART, AI , 12, "1"
-  DIAGNOSTICS_HART, AI , 13, "1"
-  DIAGNOSTICS_HART, AI , 14, "1"
-  DIAGNOSTICS_HART, AI , 15, "1"
   FAILURE_MONITORING, AI , 0, "DEACTIVATED"
   FAILURE_MONITORING, AI , 1, "DEACTIVATED"
   FAILURE_MONITORING, AI , 2, "DEACTIVATED"
@@ -337,17 +229,47 @@ export function buildAIDiagnostics(channels: Channel[]): string {
   HART_VAR_CHANNEL_8, "0"
   HART_VARIABLE_8, "0"\n`;
 
-  let dynamicString = "";
+  let channelEnableString = "";
+  let diagnosticTransducerSupply = "";
+  let diagnosticShortCircuit = "";
+  let diagnosticWireBreak = "";
+  let diagnosticOverflow = "";
+  let diagnosticUnderflow = "";
+  let diagnosticHart = "";
   channels.forEach((channel, index) => {
-    dynamicString += `  MEASURING_TYPE, AI , ${index}, "${
-      channel.spare ? "DEACTIVATED" : "CURRENT_(2-WIRE_TRANSDUCER)"
+    channelEnableString += `  MEASURING_TYPE, AI , ${index}, "${
+      !channel.spare || enableAllChannels
+        ? "CURRENT_(2-WIRE_TRANSDUCER)"
+        : "DEACTIVATED"
     }"\n`;
+    channelEnableString += `  MEASURING_RANGE, AI , ${index}, "${
+      !channel.spare || enableAllChannels ? "4_TO_20_MA_HART" : "NONE"
+    }"\n`;
+    diagnosticTransducerSupply += `  DIAGNOSTICS_TRANSDUCER_SUPPLY, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticShortCircuit += `  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+!channel.spare}"\n`;
   });
 
-  return staticBeginString + dynamicString + staticEndString;
+  return (
+    staticBeginString +
+    channelEnableString +
+    diagnosticTransducerSupply +
+    diagnosticShortCircuit +
+    diagnosticWireBreak +
+    diagnosticOverflow +
+    diagnosticUnderflow +
+    diagnosticHart +
+    staticEndString
+  );
 }
 
-export function buildAODiagnostics(channels: Channel[]): string {
+export function buildAODiagnostics(
+  channels: Channel[],
+  enableAllChannels: boolean
+): string {
   const staticBeginString = `PARAMETER 
   VERSION_HIGH, "0"
   VERSION_LOW, "0"
@@ -363,46 +285,6 @@ export function buildAODiagnostics(channels: Channel[]): string {
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "8"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
   const staticEndString = `
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 0, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 1, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 2, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 3, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 4, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 5, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 6, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT, AO , 7, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 0, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 1, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 2, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 3, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 4, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 5, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 6, "1"
-  DIAGNOSTICS_WIRE_BREAK, AO , 7, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 0, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 1, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 2, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 3, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 4, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 5, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 6, "1"
-  DIAGNOSTICS_UNDERFLOW, AO , 7, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 0, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 1, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 2, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 3, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 4, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 5, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 6, "1"
-  DIAGNOSTICS_OVERFLOW, AO , 7, "1"
-  DIAGNOSTICS_HART, AO , 0, "1"
-  DIAGNOSTICS_HART, AO , 1, "1"
-  DIAGNOSTICS_HART, AO , 2, "1"
-  DIAGNOSTICS_HART, AO , 3, "1"
-  DIAGNOSTICS_HART, AO , 4, "1"
-  DIAGNOSTICS_HART, AO , 5, "1"
-  DIAGNOSTICS_HART, AO , 6, "1"
-  DIAGNOSTICS_HART, AO , 7, "1"
   REACTION_TO_CPU_STOP, AO , 0, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
   REACTION_TO_CPU_STOP, AO , 1, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
   REACTION_TO_CPU_STOP, AO , 2, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
@@ -444,23 +326,45 @@ export function buildAODiagnostics(channels: Channel[]): string {
   HART_VAR_CHANNEL_8, "0"
   HART_VARIABLE_8, "0"\n`;
 
-  let dynamicString = "";
+  let channelEnableString = "";
+  let diagnosticShortCircuit = "";
+  let diagnosticWireBreak = "";
+  let diagnosticOverflow = "";
+  let diagnosticUnderflow = "";
+  let diagnosticHart = "";
   channels.forEach((channel, index) => {
-    dynamicString += `  TYPE_OF_OUTPUT, AO , ${index}, "${
-      channel.spare ? "DEACTIVATED" : "CURRENT"
+    channelEnableString += `  TYPE_OF_OUTPUT, AO , ${index}, "${
+      !channel.spare || enableAllChannels ? "CURRENT" : "DEACTIVATED"
     }"\n`;
   });
   channels.forEach((channel, index) => {
-    dynamicString += `  OUTPUT_RANGE, AO , ${index}, "${
-      channel.spare ? "NONE" : "4_TO_20_MA_HART"
+    channelEnableString += `  OUTPUT_RANGE, AO , ${index}, "${
+      !channel.spare || enableAllChannels ? "4_TO_20_MA_HART" : "NONE"
     }"\n`;
+    diagnosticShortCircuit += `  DIAGNOSTICS_SHORT_CIRCUIT, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+!channel.spare}"\n`;
   });
 
-  return staticBeginString + dynamicString + staticEndString;
+  return (
+    staticBeginString +
+    channelEnableString +
+    diagnosticShortCircuit +
+    diagnosticWireBreak +
+    diagnosticOverflow +
+    diagnosticUnderflow +
+    diagnosticHart +
+    staticEndString
+  );
 }
 
-export function buildDI8Diagnostics(channels: Channel[]): string {
-  const staticString = `PARAMETER 
+export function buildDI8Diagnostics(
+  channels: Channel[],
+  enableAllChannels: boolean
+): string {
+  const staticBeginString = `PARAMETER 
   VERSION_LOW, "0"
   VERSION_HIGH, "0"
   CONSTANT, "1"
@@ -470,23 +374,8 @@ export function buildDI8Diagnostics(channels: Channel[]): string {
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE, "1"
   REDUNDANCY_SETTINGS, "0"
   NUMBER_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "8"
-  LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "2"
-  CHECK_FOR_WIREBREAK, DI , 0, "0"
-  CHECK_FOR_WIREBREAK, DI , 1, "0"
-  CHECK_FOR_WIREBREAK, DI , 2, "0"
-  CHECK_FOR_WIREBREAK, DI , 3, "0"
-  CHECK_FOR_WIREBREAK, DI , 4, "0"
-  CHECK_FOR_WIREBREAK, DI , 5, "0"
-  CHECK_FOR_WIREBREAK, DI , 6, "0"
-  CHECK_FOR_WIREBREAK, DI , 7, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 0, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 1, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 2, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 3, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 4, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 5, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 6, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 7, "0"
+  LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "2"\n`;
+  const staticEndString = `
   INPUT_DELAY, DI , 0, "3.2_MS"
   INPUT_DELAY, DI , 1, "3.2_MS"
   INPUT_DELAY, DI , 2, "3.2_MS"
@@ -512,17 +401,31 @@ export function buildDI8Diagnostics(channels: Channel[]): string {
   HARDWARE_INTERRUPT_ON_FALLING_EDGE, DI , 6, "0"
   HARDWARE_INTERRUPT_ON_FALLING_EDGE, DI , 7, "0"\n`;
 
-  let dynamicString = "";
+  let channelEnableString = "";
+  let checkForWirebreak = "";
+  let diagnosticWireBreak = "";
   channels.forEach((channel, index) => {
-    dynamicString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
-      !channel.spare)}"\n`;
+    channelEnableString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(
+      !channel.spare || enableAllChannels
+    )}"\n`;
+    checkForWirebreak += `  CHECK_FOR_WIREBREAK, DI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, DI , ${index}, "${+!channel.spare}"\n`;
   });
 
-  return staticString + dynamicString;
+  return (
+    staticBeginString +
+    diagnosticWireBreak +
+    checkForWirebreak +
+    channelEnableString +
+    staticEndString
+  );
 }
 
-export function buildDI16Diagnostics(channels: Channel[]): string {
-  const staticString = `PARAMETER 
+export function buildDI16Diagnostics(
+  channels: Channel[],
+  enableAllChannels: boolean
+): string {
+  const staticBeginString = `PARAMETER 
   VERSION_HIGH, "0"
   VERSION_LOW, "0"
   CONSTANT, "1"
@@ -536,55 +439,8 @@ export function buildDI16Diagnostics(channels: Channel[]): string {
   RED_LADDR_HIGH, "0"
   RED_LADDR_LOW, "0"
   NUMBER_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "16"
-  LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "4"
-  CHECK_FOR_WIREBREAK, DI , 0, "0"
-  CHECK_FOR_WIREBREAK, DI , 1, "0"
-  CHECK_FOR_WIREBREAK, DI , 2, "0"
-  CHECK_FOR_WIREBREAK, DI , 3, "0"
-  CHECK_FOR_WIREBREAK, DI , 4, "0"
-  CHECK_FOR_WIREBREAK, DI , 5, "0"
-  CHECK_FOR_WIREBREAK, DI , 6, "0"
-  CHECK_FOR_WIREBREAK, DI , 7, "0"
-  CHECK_FOR_WIREBREAK, DI , 8, "0"
-  CHECK_FOR_WIREBREAK, DI , 9, "0"
-  CHECK_FOR_WIREBREAK, DI , 10, "0"
-  CHECK_FOR_WIREBREAK, DI , 11, "0"
-  CHECK_FOR_WIREBREAK, DI , 12, "0"
-  CHECK_FOR_WIREBREAK, DI , 13, "0"
-  CHECK_FOR_WIREBREAK, DI , 14, "0"
-  CHECK_FOR_WIREBREAK, DI , 15, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 0, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 1, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 2, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 3, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 4, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 5, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 6, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 7, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 8, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 9, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 10, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 11, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 12, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 13, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 14, "0"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , 15, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 0, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 1, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 2, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 3, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 4, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 5, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 6, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 7, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 8, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 9, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 10, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 11, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 12, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 13, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 14, "0"
-  DIAGNOSTICS_WIRE_BREAK, DI , 15, "0"
+  LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "4"\n`;
+  const staticEndString = `
   INPUT_DELAY, DI , 0, "3.2_MS"
   INPUT_DELAY, DI , 1, "3.2_MS"
   INPUT_DELAY, DI , 2, "3.2_MS"
@@ -650,16 +506,33 @@ export function buildDI16Diagnostics(channels: Channel[]): string {
   PULSE_EXTENSION, DI , 14, "OFF"
   PULSE_EXTENSION, DI , 15, "OFF"\n`;
 
-  let dynamicString = "";
+  let channelEnableString = "";
+  let checkForWirebreak = "";
+  let diagnosticShortCircuit = "";
+  let diagnosticWireBreak = "";
   channels.forEach((channel, index) => {
-    dynamicString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(channel.spare =
-      !channel.spare)}"\n`;
+    channelEnableString += `  CHANNEL_ACTIVATED, DI , ${index}, "${+(
+      !channel.spare || enableAllChannels
+    )}"\n`;
+    checkForWirebreak += `  CHECK_FOR_WIREBREAK, DI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticShortCircuit += `  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, DI , ${index}, "${+!channel.spare}"\n`;
   });
 
-  return staticString + dynamicString;
+  return (
+    staticBeginString +
+    checkForWirebreak +
+    diagnosticShortCircuit +
+    diagnosticWireBreak +
+    channelEnableString +
+    staticEndString
+  );
 }
 
-export function buildDODiagnostics(channels: Channel[]): string {
+export function buildDODiagnostics(
+  channels: Channel[],
+  enableAllChannels: boolean
+): string {
   const staticBeginString = `PARAMETER 
   VERSION_LOW, "0"
   VERSION_HIGH, "0"
@@ -675,71 +548,22 @@ export function buildDODiagnostics(channels: Channel[]): string {
   RED_LADDR_LOW, "0"
   NUMBER_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "16"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "2"
-  WIRE_BREAK_TEST, DO , 0, "1"
-  WIRE_BREAK_TEST, DO , 1, "1"
-  WIRE_BREAK_TEST, DO , 2, "1"
-  WIRE_BREAK_TEST, DO , 3, "1"
-  WIRE_BREAK_TEST, DO , 4, "1"
-  WIRE_BREAK_TEST, DO , 5, "1"
+  WIRE_BREAK_TEST, DO , 0, "0"
+  WIRE_BREAK_TEST, DO , 1, "0"
+  WIRE_BREAK_TEST, DO , 2, "0"
+  WIRE_BREAK_TEST, DO , 3, "0"
+  WIRE_BREAK_TEST, DO , 4, "0"
+  WIRE_BREAK_TEST, DO , 5, "0"
   WIRE_BREAK_TEST, DO , 6, "1"
-  WIRE_BREAK_TEST, DO , 7, "1"
-  WIRE_BREAK_TEST, DO , 8, "1"
-  WIRE_BREAK_TEST, DO , 9, "1"
-  WIRE_BREAK_TEST, DO , 10, "1"
-  WIRE_BREAK_TEST, DO , 11, "1"
-  WIRE_BREAK_TEST, DO , 12, "1"
-  WIRE_BREAK_TEST, DO , 13, "1"
-  WIRE_BREAK_TEST, DO , 14, "1"
-  WIRE_BREAK_TEST, DO , 15, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 0, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 1, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 2, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 3, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 4, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 5, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 6, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 7, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 8, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 9, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 10, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 11, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 12, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 13, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 14, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DO , 15, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 0, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 1, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 2, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 3, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 4, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 5, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 6, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 7, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 8, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 9, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 10, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 11, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 12, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 13, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 14, "1"
-  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DO , 15, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 0, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 1, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 2, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 3, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 4, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 5, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 6, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 7, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 8, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 9, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 10, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 11, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 12, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 13, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 14, "1"
-  DIAGNOSTICS_WIRE_BREAK, DO , 15, "1"\n`;
-
+  WIRE_BREAK_TEST, DO , 7, "0"
+  WIRE_BREAK_TEST, DO , 8, "0"
+  WIRE_BREAK_TEST, DO , 9, "0"
+  WIRE_BREAK_TEST, DO , 10, "0"
+  WIRE_BREAK_TEST, DO , 11, "0"
+  WIRE_BREAK_TEST, DO , 12, "0"
+  WIRE_BREAK_TEST, DO , 13, "0"
+  WIRE_BREAK_TEST, DO , 14, "0"
+  WIRE_BREAK_TEST, DO , 15, "0"\n`;
   const staticEndString = `  REACTION_TO_CPU_STOP, DO , 0, "TURN_OFF"
   REACTION_TO_CPU_STOP, DO , 1, "TURN_OFF"
   REACTION_TO_CPU_STOP, DO , 2, "TURN_OFF"
@@ -773,11 +597,25 @@ export function buildDODiagnostics(channels: Channel[]): string {
   SUBSTITUTE_VALUE, DO , 14, "0"
   SUBSTITUTE_VALUE, DO , 15, "0"\n`;
 
-  let dynamicString = "";
+  let channelEnableString = "";
+  let diagnosticShortCircuitGround = "";
+  let diagnosticShortCircuitL = "";
+  let diagnosticWireBreak = "";
   channels.forEach((channel, index) => {
-    dynamicString += `  CHANNEL_ACTIVATED, DO , ${index}, "${+(channel.spare =
-      !channel.spare)}"\n`;
+    channelEnableString += `  CHANNEL_ACTIVATED, DO , ${index}, "${+(
+      !channel.spare || enableAllChannels
+    )}"\n`;
+    diagnosticShortCircuitGround += `  DIAGNOSTICS_SHORT_CIRCUIT_TO_GROUND, DI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticShortCircuitL += `  DIAGNOSTICS_SHORT_CIRCUIT_TO_L, DI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, DI , ${index}, "${+!channel.spare}"\n`;
   });
 
-  return staticBeginString + dynamicString + staticEndString;
+  return (
+    staticBeginString +
+    diagnosticShortCircuitGround +
+    diagnosticShortCircuitL +
+    diagnosticWireBreak +
+    channelEnableString +
+    staticEndString
+  );
 }
