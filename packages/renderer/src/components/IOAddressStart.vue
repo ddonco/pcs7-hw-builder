@@ -28,7 +28,7 @@ export default defineComponent({
 
 <template>
   <div class="flex flex-row pt-2">
-    <div class="group cursor-default relative inline-block w-22 pr-2">
+    <div class="group cursor-default relative inline-block w-30 pr-2">
       {{ ioType }} Start:
     </div>
     <input

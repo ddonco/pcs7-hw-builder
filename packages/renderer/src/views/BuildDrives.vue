@@ -1,5 +1,6 @@
 <script lang="ts">
 import { useStore } from "/@/store/index";
+import ProjectTitle from "/@/components/ProjectTitle.vue";
 import ColumnNameConfig from "/@/components/ColumnNameConfig.vue";
 import IOTypeIdentifier from "/@/components/IOTypeIdentifier.vue";
 import IOAddressStart from "../components/IOAddressStart.vue";
@@ -8,6 +9,7 @@ import ProcImagePartition from "../components/ProcImagePartition.vue";
 export default {
   name: "BuildDrives",
   components: {
+    ProjectTitle,
     ColumnNameConfig,
     IOTypeIdentifier,
     IOAddressStart,
@@ -31,20 +33,20 @@ export default {
       }
     };
 
-    const parseDrives = (event: any) => {
-      let parserInputs = {
-        filePath: store.state.driveFilePath,
-        columnNames: store.state.columnNames,
-        identifiers: store.state.typeIdentifiers,
-      };
-      window.api.send("toMain", {
-        parseDrives: true,
-        payload: JSON.stringify(parserInputs),
-      });
-      window.api.receive("fromMain", (data: any) => {
-        store.dispatch("setDriveInfo", data.parseDrives);
-      });
-    };
+    // const parseDrives = (event: any) => {
+    //   let parserInputs = {
+    //     filePath: store.state.driveFilePath,
+    //     columnNames: store.state.columnNames,
+    //     identifiers: store.state.typeIdentifiers,
+    //   };
+    //   window.api.send("toMain", {
+    //     parseDrives: true,
+    //     payload: JSON.stringify(parserInputs),
+    //   });
+    //   window.api.receive("fromMain", (data: any) => {
+    //     store.dispatch("setDriveInfo", data.parseDrives);
+    //   });
+    // };
 
     const getGroupedAddresses = (grouped: boolean) => {
       let groupedAddresses = {};
@@ -97,16 +99,19 @@ export default {
 
 <template>
   <div class="px-2 w-full">
+    <div class="flex flex-row h-min">
+      <ProjectTitle :projectType="'drive'" />
+    </div>
     <div class="flex pl-2 bg-gray-100">
       <div class="text-3xl self-center">1.</div>
       <div class="flex flex-row pt-4 pb-2 pl-2 cursor-default">
         <div class="w-38 h-min font-semibold">Motor List:</div>
         <input
+          id="file_path"
+          ref="driveFilePath"
           once
           class="block w-100 h-min text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
           aria-describedby="file_path_help"
-          id="file_path"
-          ref="driveFilePath"
           type="file"
           v-on:click="clearInput"
           v-on:change="filePathChange"
@@ -134,24 +139,24 @@ export default {
           <div class="w-full">
             <div class="flex pt-1 text-center divide-x divide-gray-500">
               <ColumnNameConfig
-                :columnName="'Tag Name'"
-                :columnId="'tagName'"
+                :column-name="'Tag Name'"
+                :column-id="'tagName'"
               />
               <ColumnNameConfig
-                :columnName="'IP Address'"
-                :columnId="'ipAddress'"
+                :column-name="'IP Address'"
+                :column-id="'ipAddress'"
               />
               <ColumnNameConfig
-                :columnName="'Node Address'"
-                :columnId="'nodeAddress'"
+                :column-name="'Node Address'"
+                :column-id="'nodeAddress'"
               />
               <ColumnNameConfig
-                :columnName="'Drive Type'"
-                :columnId="'driveType'"
+                :column-name="'Drive Type'"
+                :column-id="'driveType'"
               />
               <ColumnNameConfig
-                :columnName="'Amp Rating'"
-                :columnId="'ampRating'"
+                :column-name="'Amp Rating'"
+                :column-id="'ampRating'"
               />
             </div>
           </div>
@@ -169,9 +174,9 @@ export default {
             <p class="text-xs text-gray-500">
               Enter comma separated list of Drive type identifiers.
             </p>
-            <IOTypeIdentifier :ioType="'VFD'" :examples="'VFD,VFD FS'" />
-            <IOTypeIdentifier :ioType="'FVNR'" :examples="'FVNR'" />
-            <IOTypeIdentifier :ioType="'FVR'" :examples="'FVR'" />
+            <IOTypeIdentifier :io-type="'VFD'" :examples="'VFD,VFD FS'" />
+            <IOTypeIdentifier :io-type="'FVNR'" :examples="'FVNR'" />
+            <IOTypeIdentifier :io-type="'FVR'" :examples="'FVR'" />
           </div>
         </div>
       </div>
@@ -192,9 +197,9 @@ export default {
             <p class="text-xs text-gray-500">
               Specify starting point for drive addresses.
             </p>
-            <IOAddressStart :ioType="'Drive'" />
-            <IOAddressStart :ioType="'Node'" />
-            <IOAddressStart :ioType="'IOSubSys'" />
+            <IOAddressStart :io-type="'Drive'" />
+            <IOAddressStart :io-type="'Node'" />
+            <IOAddressStart :io-type="'IOSubSys'" />
           </div>
         </div>
       </div>
@@ -207,7 +212,7 @@ export default {
         >
           <div>Generate Drives HW Config</div>
           <div>
-            <ProcImagePartition :pipType="'Drive'" />
+            <ProcImagePartition :pip-type="'Drive'" />
             <div class="pt-4 w-full text-center">
               <button
                 type="button"

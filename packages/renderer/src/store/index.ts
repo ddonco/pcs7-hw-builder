@@ -4,31 +4,13 @@ import { createStore, useStore as baseUseStore, Store } from "vuex";
 export interface State {
   ioFilePath: string;
   driveFilePath: string;
-  columnNames: {
-    tagName: string;
-    description: string;
-    rack: string;
-    slot: string;
-    channel: string;
-    ipAddress: string;
-    nodeAddress: string;
-    ioType: string;
-    driveType: string;
-    ampRating: string;
-  };
+  columnNames: { [type: string]: string };
   headers: string[];
-  typeIdentifiers: {
-    di: string[];
-    do: string[];
-    ai: string[];
-    ao: string[];
-    vfd: string[];
-    fvnr: string[];
-    fvr: string[];
-  };
+  typeIdentifiers: { [type: string]: string[] };
   startAddress: { [type: string]: number };
   hardwareInfo: { [type: string]: number };
   driveInfo: { [type: string]: number };
+  groupIOAddresses: boolean;
   enableAllChannels: boolean;
   pips: { [type: string]: number };
   logs: string[];
@@ -73,6 +55,7 @@ export const store = createStore<State>({
     },
     hardwareInfo: {},
     driveInfo: {},
+    groupIOAddresses: false,
     enableAllChannels: false,
     pips: {
       analogPIP: 3,
@@ -144,6 +127,9 @@ export const store = createStore<State>({
     SET_START_ADDRESSES(state, addresses) {
       state.startAddress = addresses;
     },
+    SET_GROUP_IO_ADDRESSES(state, groupIOAddresses) {
+      state.groupIOAddresses = groupIOAddresses;
+    },
     SET_ENABLE_ALL_CHANNELS(state, enableAllChannels) {
       state.enableAllChannels = enableAllChannels;
     },
@@ -181,6 +167,9 @@ export const store = createStore<State>({
     },
     setStartAddresses({ commit }, groupAddresses) {
       commit("SET_START_ADDRESSES", groupAddresses);
+    },
+    setGroupIOAddresses({ commit }, groupIOAddresses) {
+      commit("SET_GROUP_IO_ADDRESSES", groupIOAddresses);
     },
     setEnableAllChannels({ commit }, enableAllChannels) {
       commit("SET_ENABLE_ALL_CHANNELS", enableAllChannels);

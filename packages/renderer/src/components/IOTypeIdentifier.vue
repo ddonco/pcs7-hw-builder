@@ -15,17 +15,16 @@ export default defineComponent({
       store.dispatch("setTypeIdentifiers", [ioType, identifiers]);
     };
     return {
-      identifiers: "",
       identifierChange,
     };
   },
-  // computed: {
-  //   identifier: function () {
-  //     const store = useStore();
-  //     let identifiers = store.state.typeIdentifiers;
-  //     return identifiers[String(this.ioType).toLowerCase()];
-  //   },
-  // },
+  computed: {
+    identifier: function () {
+      const store = useStore();
+      let identifiers = store.state.typeIdentifiers;
+      return identifiers[String(this.ioType).toLowerCase()];
+    },
+  },
 });
 </script>
 
@@ -52,7 +51,7 @@ export default defineComponent({
       class="xs:w-full sm:w-full md:w-140 lg:w-140 xl:w-140 2xl:w-140 rounded border border-gray-300"
       type="text"
       spellcheck="false"
-      v-model="identifiers"
+      v-model="identifier"
       v-on:input="identifierChange($event, ioType)"
     />
   </div>

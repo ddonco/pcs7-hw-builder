@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
+import ProjectTitle from "/@/components/ProjectTitle.vue";
 import ColumnNameConfig from "/@/components/ColumnNameConfig.vue";
 import IOTypeIdentifier from "/@/components/IOTypeIdentifier.vue";
 import IOAddressStart from "../components/IOAddressStart.vue";
@@ -9,6 +10,7 @@ import { useStore } from "/@/store/index";
 export default defineComponent({
   name: "BuildHW",
   components: {
+    ProjectTitle,
     ColumnNameConfig,
     IOTypeIdentifier,
     IOAddressStart,
@@ -65,6 +67,7 @@ export default defineComponent({
         };
       }
       store.dispatch("setStartAddresses", groupedAddresses);
+      store.dispatch("setGroupIOAddresses", grouped);
     };
 
     const setEnableChannels = (enable: boolean) => {
@@ -88,6 +91,18 @@ export default defineComponent({
       generateHwConfig,
       ioFilePath: "",
     };
+  },
+  computed: {
+    groupIOAddressModel: function () {
+      const store = useStore();
+      let groupIOAddresses = store.state.groupIOAddresses;
+      return groupIOAddresses;
+    },
+    enableAllChannelsModel: function () {
+      const store = useStore();
+      let enableAllChannels = store.state.enableAllChannels;
+      return enableAllChannels;
+    },
   },
   methods: {
     filePathChange: function (event: any) {
@@ -114,16 +129,19 @@ export default defineComponent({
 
 <template>
   <div class="px-2 w-full">
+    <div class="flex flex-row h-min">
+      <ProjectTitle :project-type="'io'" />
+    </div>
     <div class="flex pl-2 bg-gray-100">
       <div class="text-3xl self-center">1.</div>
       <div class="flex flex-row pt-4 pb-2 pl-2 cursor-default">
         <div class="w-38 h-min font-semibold">I/O Assignment List:</div>
         <input
+          id="file_path"
+          ref="ioFilePath"
           once
           class="block w-100 h-min text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
           aria-describedby="file_path_help"
-          id="file_path"
-          ref="ioFilePath"
           type="file"
           v-on:click="clearInput"
           v-on:change="filePathChange"
@@ -151,17 +169,23 @@ export default defineComponent({
           <div class="w-full">
             <div class="flex pt-1 text-center divide-x divide-gray-500">
               <ColumnNameConfig
-                :columnName="'Tag Name'"
-                :columnId="'tagName'"
+                :column-name="'Tag Name'"
+                :column-id="'tagName'"
               />
               <ColumnNameConfig
-                :columnName="'Description'"
-                :columnId="'description'"
+                :column-name="'Description'"
+                :column-id="'description'"
               />
-              <ColumnNameConfig :columnName="'I/O Type'" :columnId="'ioType'" />
-              <ColumnNameConfig :columnName="'Rack'" :columnId="'rack'" />
-              <ColumnNameConfig :columnName="'Slot'" :columnId="'slot'" />
-              <ColumnNameConfig :columnName="'Channel'" :columnId="'channel'" />
+              <ColumnNameConfig
+                :column-name="'I/O Type'"
+                :column-id="'ioType'"
+              />
+              <ColumnNameConfig :column-name="'Rack'" :column-id="'rack'" />
+              <ColumnNameConfig :column-name="'Slot'" :column-id="'slot'" />
+              <ColumnNameConfig
+                :column-name="'Channel'"
+                :column-id="'channel'"
+              />
             </div>
           </div>
         </div>
@@ -179,18 +203,18 @@ export default defineComponent({
               Enter comma separated list of I/O type identifiers.
             </p>
             <IOTypeIdentifier
-              :ioType="'DI'"
+              :io-type="'DI'"
               :examples="'DI,Digital Input,DI Dry Contact'"
             />
             <IOTypeIdentifier
-              :ioType="'DO'"
+              :io-type="'DO'"
               :examples="'DO,Digital Output,DO High Side'"
             />
             <IOTypeIdentifier
-              :ioType="'AI'"
+              :io-type="'AI'"
               :examples="'AI,Analog Input,AI2,AI4'"
             />
-            <IOTypeIdentifier :ioType="'AO'" :examples="'AO,Analog Output'" />
+            <IOTypeIdentifier :io-type="'AO'" :examples="'AO,Analog Output'" />
           </div>
         </div>
       </div>
@@ -238,16 +262,17 @@ export default defineComponent({
               <div class="pr-2">Group I/O Addresses by Type</div>
               <div class="flex items-center">
                 <input
+                  v-model="groupIOAddressModel"
                   type="checkbox"
                   class="checked:bg-blue-500"
                   v-on:change="groupIOAddressChange"
                 />
               </div>
             </div>
-            <IOAddressStart :ioType="'DI'" />
-            <IOAddressStart :ioType="'DO'" />
-            <IOAddressStart :ioType="'AI'" />
-            <IOAddressStart :ioType="'AO'" />
+            <IOAddressStart :io-type="'DI'" />
+            <IOAddressStart :io-type="'DO'" />
+            <IOAddressStart :io-type="'AI'" />
+            <IOAddressStart :io-type="'AO'" />
           </div>
         </div>
       </div>
@@ -264,14 +289,15 @@ export default defineComponent({
               <div class="pr-2">Enable All Channels</div>
               <div class="flex items-center">
                 <input
+                  v-model="enableAllChannelsModel"
                   type="checkbox"
                   class="checked:bg-blue-500"
                   v-on:change="enableAllChannels"
                 />
               </div>
             </div>
-            <ProcImagePartition :pipType="'Digital'" />
-            <ProcImagePartition :pipType="'Analog'" />
+            <ProcImagePartition :pip-type="'Digital'" />
+            <ProcImagePartition :pip-type="'Analog'" />
             <div class="pt-4 w-full text-center">
               <button
                 type="button"

@@ -5,7 +5,7 @@
   },
   "extends": [
     /** @see https://eslint.vuejs.org/rules/ */
-    "plugin:vue/vue3-recommended"
+    "plugin:vue/vue3-strongly-recommended"
   ],
   "rules": {
     "vue/html-self-closing": ["error", {
@@ -16,7 +16,8 @@
       },
       "svg": "always",
       "math": "always"
-    }]
+    }],
+    "vue/v-on-style": 0
   },
   "parserOptions": {
     "parser": "@typescript-eslint/parser",

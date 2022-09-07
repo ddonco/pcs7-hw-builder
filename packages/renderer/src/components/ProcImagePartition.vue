@@ -17,7 +17,7 @@ export default defineComponent({
     return { pipChange };
   },
   computed: {
-    pip: function () {
+    pipModel: function () {
       const store = useStore();
       let pips = store.state.pips;
       return pips[String(this.pipType).toLowerCase() + "PIP"];
@@ -36,7 +36,7 @@ export default defineComponent({
     <input
       class="w-20 pr-2 text-right rounded border border-gray-300"
       type="text"
-      v-model="pip"
+      v-model="pipModel"
       v-on:change="pipChange($event, pipType)"
     />
   </div>

@@ -1,12 +1,10 @@
 <script lang="ts">
 import NavSideBar from "./components/NavSideBar.vue";
-import ProjectTitle from "./components/ProjectTitle.vue";
 
 export default {
   name: "App",
   components: {
     NavSideBar,
-    ProjectTitle,
   },
   // mounted() {
   //   this.$nextTick(function () {
@@ -23,9 +21,6 @@ export default {
     <!-- container -->
     <NavSideBar />
     <div class="flex flex-col w-full">
-      <div class="flex flex-row h-min">
-        <ProjectTitle />
-      </div>
       <div class="flex flex-row h-full">
         <!-- content area -->
         <router-view />
