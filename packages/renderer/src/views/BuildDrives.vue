@@ -72,6 +72,9 @@ export default {
       window.api.send("toMain", {
         generateDriveConfig: true,
         payload: JSON.stringify(builderInputs),
+        buildOptions: JSON.stringify({
+          drivePIP: store.state.pips.drivePIP,
+        }),
       });
     };
     return {

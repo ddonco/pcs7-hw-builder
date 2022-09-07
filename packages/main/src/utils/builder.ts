@@ -25,6 +25,7 @@ export function buildHWConfig(
   const enableAllChannels = buildOptions["enableAllChannels"];
   const analogPIP = buildOptions["analogPIP"];
   const digitalPIP = buildOptions["digitalPIP"];
+  console.log(enableAllChannels, analogPIP, digitalPIP);
 
   // Parse addresses from strings to ints
   let ioStartAddressParsed: { [moduleType: string]: number } = {};

@@ -78,7 +78,11 @@ export default defineComponent({
       if (Object.keys(store.state.hardwareInfo).length > 0) {
         window.api.send("toMain", {
           generateHwConfig: JSON.stringify(store.state.startAddress),
-          buildOptions: JSON.stringify(""),
+          buildOptions: JSON.stringify({
+            enableAllChannels: store.state.enableAllChannels,
+            analogPIP: store.state.pips.analogPIP,
+            digitalPIP: store.state.pips.digitalPIP,
+          }),
         });
       }
     };

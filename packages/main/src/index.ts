@@ -109,8 +109,8 @@ ipcMain.on("toMain", (event, args) => {
   console.log(`args: ${JSON.stringify(args)}`);
   if ("updateLogs" in args) {
     try {
-      let fileContent = fsExtra.readFileSync(logFile, "utf8");
-      let logsArr = fileContent.split(/\r?\n/);
+      const fileContent = fsExtra.readFileSync(logFile, "utf8");
+      const logsArr = fileContent.split(/\r?\n/);
       event.sender.send("fromMain", {
         logs: logsArr.slice(0, -1),
       });
@@ -141,7 +141,7 @@ ipcMain.on("toMain", (event, args) => {
 
   if ("parseAssignedIo" in args) {
     try {
-      let payload = JSON.parse(args["payload"]);
+      const payload = JSON.parse(args["payload"]);
       ioFilePath = payload["filePath"];
       columnNames = payload["columnNames"];
       typeIdentifier = payload["identifiers"];
@@ -186,7 +186,7 @@ ipcMain.on("toMain", (event, args) => {
 
   if ("generateDriveConfig" in args) {
     try {
-      let payload = JSON.parse(args["payload"]);
+      const payload = JSON.parse(args["payload"]);
       driveFilePath = payload["filePath"];
       columnNames = payload["columnNames"];
       typeIdentifier = payload["identifiers"];
