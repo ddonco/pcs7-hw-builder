@@ -4,11 +4,14 @@ import { useStore } from "/@/store/index";
 
 export default defineComponent({
   props: {
-    ioType: String,
+    ioType: {
+      type: String,
+      default: "",
+    },
   },
   setup() {
     const store = useStore();
-    const addressChange = (event: any, ioType: String) => {
+    const addressChange = (event: any, ioType: string) => {
       store.dispatch("setIndividualAddress", [
         String(ioType).toLowerCase(),
         parseInt(event.target.value, 10),

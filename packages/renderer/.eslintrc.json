@@ -17,7 +17,8 @@
       "svg": "always",
       "math": "always"
     }],
-    "vue/v-on-style": 0
+    "vue/v-on-style": 0,
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "parserOptions": {
     "parser": "@typescript-eslint/parser",

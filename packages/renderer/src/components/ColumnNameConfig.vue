@@ -5,8 +5,14 @@ import ColumnNameSelect from "./ColumnNameSelect.vue";
 export default defineComponent({
   name: "ColumnNameConfig",
   props: {
-    columnName: String,
-    columnId: String,
+    columnName: {
+      type: String,
+      default: "",
+    },
+    columnId: {
+      type: String,
+      default: "",
+    },
   },
   components: {
     ColumnNameSelect,
@@ -20,7 +26,7 @@ export default defineComponent({
       <h3>{{ columnName }}</h3>
     </div>
     <div class="flex-row">
-      <ColumnNameSelect :columnId="columnId" />
+      <ColumnNameSelect :column-id="columnId" />
     </div>
   </div>
 </template>

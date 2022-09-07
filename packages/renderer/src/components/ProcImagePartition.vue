@@ -4,11 +4,14 @@ import { useStore } from "/@/store/index";
 
 export default defineComponent({
   props: {
-    pipType: String,
+    pipType: {
+      type: String,
+      default: "",
+    },
   },
   setup() {
     const store = useStore();
-    const pipChange = (event: any, pipType: String) => {
+    const pipChange = (event: any, pipType: string) => {
       store.dispatch("setPIP", [
         String(pipType).toLowerCase() + "PIP",
         parseInt(event.target.value, 10),

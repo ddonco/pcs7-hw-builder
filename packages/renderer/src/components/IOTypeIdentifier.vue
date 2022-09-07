@@ -1,12 +1,17 @@
 <script lang="ts">
-import { isFunctionType } from "@vue/compiler-core";
 import { defineComponent } from "vue";
 import { useStore } from "/@/store/index";
 
 export default defineComponent({
   props: {
-    ioType: String,
-    examples: String,
+    ioType: {
+      type: String,
+      default: "",
+    },
+    examples: {
+      type: String,
+      default: "",
+    },
   },
   setup() {
     const store = useStore();
