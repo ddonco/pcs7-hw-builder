@@ -187,6 +187,7 @@ ipcMain.on("toMain", (event, args) => {
   if ("generateDriveConfig" in args) {
     try {
       const payload = JSON.parse(args["payload"]);
+      buildOptions = JSON.parse(args["buildOptions"]);
       driveFilePath = payload["filePath"];
       columnNames = payload["columnNames"];
       typeIdentifier = payload["identifiers"];
