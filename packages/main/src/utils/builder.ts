@@ -5,11 +5,17 @@ import {
   buildDOConfig,
   buildAIConfig,
   buildAOConfig,
+  buildModuleSymbolTable,
 } from "./profinet_modules";
 import { buildUMC100, buildACSVFD } from "./profinet_abb_drives";
 import { hwBuilderLogger } from "./logger";
 
 const childLogger = hwBuilderLogger.child({ component: "rack-builder" });
+
+const SYMBOLTABLE_ROW_PREFIX = "126,";
+const SYMBOLTABLE_IN_TYPE = "IW";
+const SYMBOLTABLE_OUT_TYPE = "QW";
+const SYMBOLTABLE_DATATYPE = "WORD";
 
 export function buildHWConfig(
   outFilePath: string,
@@ -19,13 +25,13 @@ export function buildHWConfig(
   hardwareInfo: { [type: string]: number },
   ioStartAddress: { [moduleType: string]: string } = {},
   groupIoTypes: boolean = false,
+  buildSymbolTable: boolean,
   buildOptions: { [type: string]: any }
 ): any {
   const sortedHW = sortHW(hardwareRacks);
   const enableAllChannels = buildOptions["enableAllChannels"];
   const analogPIP = buildOptions["analogPIP"];
   const digitalPIP = buildOptions["digitalPIP"];
-  console.log(enableAllChannels, analogPIP, digitalPIP);
 
   // Parse addresses from strings to ints
   let ioStartAddressParsed: { [moduleType: string]: number } = {};
@@ -44,17 +50,21 @@ export function buildHWConfig(
     addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddressParsed);
   }
 
-  let writeStream = fs.createWriteStream(outFilePath);
+  const writeStream = fs.createWriteStream(outFilePath);
   let buildString: string;
 
+  const symbolTableFilePath =
+    outFilePath.split(".").slice(0, -1).join(".") + ".asc";
+  const symbolTableStream = fs.createWriteStream(symbolTableFilePath);
+
   for (const rack in addressedHW) {
-    let rackName = `RIO-${rack}`;
-    let deviceNumber = parseInt(rack, 10);
+    const rackName = `RIO-${rack}`;
+    const deviceNumber = parseInt(rack, 10);
     buildString = buildET200SPHA(rackName, deviceNumber);
     writeStream.write(buildString);
 
     // for (const slot in addressedHW[rack]) {
-    for (const [index, [slot, value]] of Object.entries(
+    for (const [index, [slot, _]] of Object.entries(
       Object.entries(addressedHW[rack])
     )) {
       if (index === "0" && slot !== "2") {
@@ -126,6 +136,12 @@ export function buildHWConfig(
         );
       }
       writeStream.write(buildString);
+
+      const symbolTableString = buildModuleSymbolTable(
+        addressedHW[rack][slot].type,
+        addressedHW[rack][slot].channels
+      );
+      symbolTableStream.write(symbolTableString);
     }
   }
 
@@ -133,6 +149,7 @@ export function buildHWConfig(
     console.log("Export Complete");
   });
   writeStream.end();
+  symbolTableStream.end();
   return {};
 }
 
@@ -141,15 +158,20 @@ export function buildDrivesConfig(
   drives: {
     [node: string]: any;
   },
+  buildSymbolTable: boolean,
   buildOptions: { [type: string]: any }
 ): any {
   const drivePIP = buildOptions["drivePIP"];
-  let writeStream = fs.createWriteStream(outFilePath);
-  let csvFilePath = outFilePath.split(".").slice(0, -1).join(".") + ".csv";
-  let csvStream = fs.createWriteStream(csvFilePath);
-  let buildString: string = "";
-  let buildCsvString: string = "name,node,address,subsystem,ipaddress,type\n";
+  const writeStream = fs.createWriteStream(outFilePath);
+  const csvFilePath = outFilePath.split(".").slice(0, -1).join(".") + ".csv";
+  const csvStream = fs.createWriteStream(csvFilePath);
+  let buildString = "";
+  let buildCsvString = "name,node,address,subsystem,ipaddress,type\n";
   csvStream.write(buildCsvString);
+
+  const symbolTableFilePath =
+    outFilePath.split(".").slice(0, -1).join(".") + ".asc";
+  const symbolTableStream = fs.createWriteStream(symbolTableFilePath);
 
   for (const node in drives) {
     if (drives[node].type === "VFD") {
@@ -164,6 +186,40 @@ export function buildDrivesConfig(
     }\n`;
     writeStream.write(buildString);
     csvStream.write(buildCsvString);
+
+    if (buildSymbolTable) {
+      // Build input symbols
+      for (let w = 0; w < drives[node].totalInBytes; w += 2) {
+        const wordAddress = drives[node].startAddress + w;
+        const writeStr =
+          SYMBOLTABLE_ROW_PREFIX +
+          `${drives[node].name}_${SYMBOLTABLE_IN_TYPE}${w / 2 + 1}`.padEnd(
+            24,
+            " "
+          ) +
+          SYMBOLTABLE_IN_TYPE.padEnd(5, " ") +
+          wordAddress.toString().padEnd(7, " ") +
+          SYMBOLTABLE_DATATYPE.padEnd(10, " ") +
+          drives[node].description; // ********** Needs actual description ***********
+        symbolTableStream.write(writeStr);
+      }
+
+      // Build output symbols
+      for (let w = 0; w < drives[node].totalOutBytes; w += 2) {
+        const wordAddress = drives[node].startAddress + w;
+        const writeStr =
+          SYMBOLTABLE_ROW_PREFIX +
+          `${drives[node].name}_${SYMBOLTABLE_OUT_TYPE}${w / 2 + 1}`.padEnd(
+            24,
+            " "
+          ) +
+          SYMBOLTABLE_OUT_TYPE.padEnd(5, " ") +
+          wordAddress.toString().padEnd(7, " ") +
+          SYMBOLTABLE_DATATYPE.padEnd(10, " ") +
+          drives[node].description; // ********** Needs actual description ***********
+        symbolTableStream.write(writeStr);
+      }
+    }
   }
 
   writeStream.on("finish", () => {
@@ -171,6 +227,7 @@ export function buildDrivesConfig(
   });
   writeStream.end();
   csvStream.end();
+  symbolTableStream.end();
 }
 
 function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
@@ -204,9 +261,9 @@ function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
   });
 
   // Iterate over sorted racks to build sortedHW in ascending rack order
-  racks.forEach((rack, rIndex) => {
+  racks.forEach((rack, _) => {
     sortedHW[rack] = {};
-    slotsInRacks[rack].forEach((slot, sIndex) => {
+    slotsInRacks[rack].forEach((slot, _) => {
       sortedHW[rack][slot] = hardwareRacks[rack.toString()][slot.toString()];
     });
   });
@@ -296,6 +353,7 @@ function getGroupedIoAddresses(
         hardwareRacks[rack][slot].startAddress = nextAddress["DO"];
         nextAddress["DO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
+      hardwareRacks[rack][slot].updateChannelAddresses();
     }
   }
   return hardwareRacks;

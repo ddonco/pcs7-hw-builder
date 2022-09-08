@@ -85,17 +85,36 @@ export class HWModule {
   }
 
   nextStartAddress(): number {
-    let nextInAddress = this.startAddress + this.totalInBytes;
-    let nextOutAddress = this.startAddress + this.totalOutBytes;
+    const nextInAddress = this.startAddress + this.totalInBytes;
+    const nextOutAddress = this.startAddress + this.totalOutBytes;
     return nextInAddress > nextOutAddress ? nextInAddress : nextOutAddress;
   }
 
   updateChannelAddresses() {
-    for (let i = 0; i < this.channels.length; i++) {
-      this.channels[i].address = (
-        this.startAddress +
-        this.bytesPerChannel * i
-      ).toFixed(1);
+    if (this.type === "AI" || this.type === "AO") {
+      for (let i = 0; i < this.channels.length; i++) {
+        this.channels[i].address = (
+          this.startAddress +
+          this.bytesPerChannel * i
+        ).toFixed(1);
+      }
+    }
+
+    if (this.type === "DI" || this.type === "DO") {
+      let bit = 0;
+      let byte = 0;
+      for (let i = 0; i < this.channels.length; i++) {
+        if (i % 8 === 0 && i > 0) {
+          bit = 0;
+          byte++;
+        }
+        this.channels[i].address = (
+          this.startAddress +
+          byte +
+          this.bytesPerChannel * bit
+        ).toFixed(1);
+        bit++;
+      }
     }
   }
 }
@@ -140,7 +159,7 @@ export class DI_6DL11316GF000PK0 extends HWModule {
 
 export class DI_6DL11316BH000PH1 extends HWModule {
   partNumber: string = "6DL1 131-6BH00-0PH1";
-  description: string = "DI8 x 24VDC HA";
+  description: string = "DI16 x 24VDC HA";
   type: string = "DI";
   channelCount: number = 16;
   bytesPerChannel: number = 0.1;

@@ -37,6 +37,7 @@ let buildOptions: { [option: string]: any } = {
   digitalPIP: 4,
   drivePIP: 4,
 };
+let buildSymbolTable = true;
 
 const logFile = "logs/hw_builder.log";
 
@@ -175,6 +176,7 @@ ipcMain.on("toMain", (event, args) => {
             hardwareInfo,
             userAddressParams,
             groupIOAddresses,
+            buildSymbolTable,
             buildOptions
           );
         }
@@ -215,12 +217,13 @@ ipcMain.on("toMain", (event, args) => {
           sortedRacks = buildDrivesConfig(
             String(result.filePath),
             drives,
+            buildSymbolTable,
             buildOptions
           );
         }
       })
       .catch((err) => {
-        console.log(`generate hwconfig save error: ${err}`);
+        console.log(`generate drive save error: ${err}`);
       });
   }
 });

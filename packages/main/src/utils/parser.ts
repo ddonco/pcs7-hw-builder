@@ -72,10 +72,10 @@ export function parseAssignedIO(
   };
 
   for (let row = 0; row < dfArray.length; row++) {
-    let rack: number = parseInt(dfArray[row][ioColumnNames.rack], 10);
-    let slot: number = parseInt(dfArray[row][ioColumnNames.slot], 10);
+    const rack: number = parseInt(dfArray[row][ioColumnNames.rack], 10);
+    const slot: number = parseInt(dfArray[row][ioColumnNames.slot], 10);
     let channel: number = parseInt(dfArray[row][ioColumnNames.channel], 10);
-    let tagName: string = dfArray[row][ioColumnNames.tagName];
+    const tagName: string = dfArray[row][ioColumnNames.tagName];
     let description: string = dfArray[row][ioColumnNames.description];
     let channelType: string = dfArray[row][ioColumnNames.ioType];
     let assignSuccess: boolean = false;
@@ -241,9 +241,9 @@ export function parseDrives(
 
   const dfArray = df.toArray();
   for (let row = 0; row < dfArray.length; row++) {
-    let tagName: string = dfArray[row][columnNames.tagName];
+    const tagName: string = dfArray[row][columnNames.tagName];
     let description: string = dfArray[row][columnNames.description];
-    let ipAddress: string = dfArray[row][columnNames.ipAddress];
+    const ipAddress: string = dfArray[row][columnNames.ipAddress];
     let driveType: string = dfArray[row][columnNames.driveType];
     let ampRating: number = parseFloat(dfArray[row][columnNames.ampRating]);
     ipAddressArr = [];
@@ -286,7 +286,7 @@ export function parseDrives(
       continue;
     }
 
-    ipAddress.split(".").forEach((item, index) => {
+    ipAddress.split(".").forEach((item, _) => {
       ipAddressArr.push(parseInt(item, 10));
     });
 
@@ -461,7 +461,7 @@ export function parseRawIO(
   });
 
   df = df.orderBy((row: any) => row.Tagnames);
-  let dfArray = df.orderBy((row: any) => row.Type).toArray();
+  const dfArray = df.orderBy((row: any) => row.Type).toArray();
 
   let addressLookup: { [type: string]: number } = {
     nextDigitalAddress: DIGITAL_START_ADDRESS,
@@ -479,9 +479,9 @@ export function parseRawIO(
   let openAoModule: AO_6DL11356TF000PH1 = new AO_6DL11356TF000PH1();
 
   for (let r = 0; r < dfArray.length; r++) {
-    let tagName: string = dfArray[r]["Tagnames"];
+    const tagName: string = dfArray[r]["Tagnames"];
     let description: string = dfArray[r]["Comment"];
-    let channelType: string = dfArray[r]["Type"];
+    const channelType: string = dfArray[r]["Type"];
 
     if (description === "undefined" || typeof description === "undefined")
       description = "";
@@ -563,7 +563,7 @@ export function parseRawIO(
   let currentSlot = 2;
   let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
   let previousModuleType = "";
-  for (let [_, moduleList] of Object.entries(hwModules)) {
+  for (const [_, moduleList] of Object.entries(hwModules)) {
     for (let i = 0; i < moduleList.length; i++) {
       if (!(currentRack in hardwareRacks)) {
         hardwareRacks[currentRack] = {};

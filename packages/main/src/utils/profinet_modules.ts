@@ -8,7 +8,10 @@ import {
   buildDODiagnostics,
 } from "./profinet_diagnostics";
 
-function buildSymbols(channelType: string, channels: Channel[]): string {
+function buildDiagnosticSymbols(
+  channelType: string,
+  channels: Channel[]
+): string {
   let returnString = "";
   let symbolType = "I";
   let symbolOffset = 1;
@@ -19,6 +22,41 @@ function buildSymbols(channelType: string, channels: Channel[]): string {
     returnString += `SYMBOL  ${symbolType} , ${symbolOffset * index}, "${
       channel.tagName
     }", "${channel.description}"\n`;
+  });
+  return returnString;
+}
+
+export function buildModuleSymbolTable(
+  channelType: string,
+  channels: Channel[]
+) {
+  let returnString = "";
+  const rowStart = "126,";
+  const symbolType: { [type: string]: string } = {
+    AI: "IW",
+    AO: "QW",
+    DI: "I",
+    DO: "Q",
+  };
+  const dataType: { [type: string]: string } = {
+    AI: "WORD",
+    AO: "WORD",
+    DI: "BOOL",
+    DO: "BOOL",
+  };
+
+  channels.forEach((channel, _) => {
+    returnString +=
+      rowStart +
+      channel.tagName.padEnd(24, " ") +
+      symbolType[channelType].padEnd(5, " ") +
+      (dataType[channelType].includes("W")
+        ? channel.address.slice(0, channel.address.indexOf("."))
+        : channel.address
+      ).padEnd(7, " ") +
+      dataType[channelType].padEnd(10, " ") +
+      channel.description +
+      "\n";
   });
   return returnString;
 }
@@ -53,7 +91,7 @@ export function buildAIConfig(
   enableAllChannels: boolean,
   pip: number
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+  const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(
     -2
@@ -61,11 +99,11 @@ export function buildAIConfig(
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, ${pip}, 0, 32\n`;
-  let symbols = buildSymbols("AI", channels);
-  let diagnostics = buildAIDiagnostics(channels, enableAllChannels);
-  let end = `  POTENTIAL_GROUP, "NEW_GROUP"
+  const symbols = buildDiagnosticSymbols("AI", channels);
+  const diagnostics = buildAIDiagnostics(channels, enableAllChannels);
+  const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
-  let hartModules = buildHartConfig(
+  const hartModules = buildHartConfig(
     rackNumber,
     slotNumber,
     hartModuleType,
@@ -89,7 +127,7 @@ export function buildAOConfig(
   enableAllChannels: boolean,
   pip: number
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+  const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(
     -2
@@ -99,11 +137,11 @@ export function buildAOConfig(
     ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, ${pip}, 0, 32
   LOCAL_OUT_ADDRESSES
     ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, ${pip}, 0, 32\n`;
-  let symbols = buildSymbols("AO", channels);
-  let diagnostics = buildAODiagnostics(channels, enableAllChannels);
-  let end = `  POTENTIAL_GROUP, "NEW_GROUP"
+  const symbols = buildDiagnosticSymbols("AO", channels);
+  const diagnostics = buildAODiagnostics(channels, enableAllChannels);
+  const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
-  let hartModules = buildHartConfig(
+  const hartModules = buildHartConfig(
     rackNumber,
     slotNumber,
     hartModuleType,
@@ -123,13 +161,13 @@ export function buildDIConfig(
   enableAllChannels: boolean,
   pip: number
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+  const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, ${pip}, 0, 16\n`;
-  let symbols = buildSymbols("DI", channels);
+  const symbols = buildDiagnosticSymbols("DI", channels);
 
   let diagnostics: string;
   if (channels.length == 8) {
@@ -138,7 +176,7 @@ export function buildDIConfig(
     diagnostics = buildDI16Diagnostics(channels, enableAllChannels);
   }
 
-  let end = `  POTENTIAL_GROUP, "NEW_GROUP"
+  const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   return begin + symbols + diagnostics + end;
 }
@@ -156,7 +194,7 @@ export function buildDOConfig(
   enableAllChannels: boolean,
   pip: number
 ): string {
-  let begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
+  const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
     -2
   )}, SLOT ${("00" + slotNumber).slice(-2)}, "${modulePartNo}", "${moduleName}"
   BEGIN 
@@ -164,9 +202,9 @@ export function buildDOConfig(
     ADDRESS  ${moduleInAddress}, 0, ${moduleInBytesSize}, ${pip}, 0, 16
   LOCAL_OUT_ADDRESSES
     ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, ${pip}, 0, 16\n`;
-  let symbols = buildSymbols("DO", channels);
-  let diagnostics = buildDODiagnostics(channels, enableAllChannels);
-  let end = `  POTENTIAL_GROUP, "NEW_GROUP"
+  const symbols = buildDiagnosticSymbols("DO", channels);
+  const diagnostics = buildDODiagnostics(channels, enableAllChannels);
+  const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   return begin + symbols + diagnostics + end;
 }
