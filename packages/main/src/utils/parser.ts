@@ -260,9 +260,7 @@ export function parseDrives(
       typeof ampRating === "undefined" ||
       isNaN(ampRating)
     ) {
-      ampRating = 50;
-    } else {
-      ampRating = Math.round(ampRating * 10) * 10;
+      ampRating = 0.5;
     }
 
     if (
@@ -316,6 +314,7 @@ export function parseDrives(
       }
       [driveModule, addressLookup] = buildDrive(
         tagName,
+        description,
         driveType,
         ampRating,
         addressLookup,
@@ -402,6 +401,7 @@ function buildModule(
 
 function buildDrive(
   tagName: string,
+  description: string,
   driveType: string,
   ampRating: number,
   addressLookup: { [type: string]: number },
@@ -418,6 +418,7 @@ function buildDrive(
   if (driveType === VFD_MODULE) {
     const driveModule = new ABBVFD(
       tagName,
+      description,
       nextNodeAddress,
       addressLookup.ioSubSystem,
       addressLookup.nextDriveAddress,
@@ -430,6 +431,7 @@ function buildDrive(
   if (driveType === FVNR_MODULE || driveType === FVR_MODULE) {
     const driveModule = new ABBUMC100(
       tagName,
+      description,
       nextNodeAddress,
       addressLookup.ioSubSystem,
       addressLookup.nextDriveAddress,

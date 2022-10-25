@@ -146,6 +146,10 @@ export default {
                 :column-id="'tagName'"
               />
               <ColumnNameConfig
+                :column-name="'Desc.'"
+                :column-id="'description'"
+              />
+              <ColumnNameConfig
                 :column-name="'IP Address'"
                 :column-id="'ipAddress'"
               />

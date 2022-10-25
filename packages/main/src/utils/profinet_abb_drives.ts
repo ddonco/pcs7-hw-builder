@@ -18,6 +18,8 @@ export function buildUMC100(drive: ABBUMC100, drivePIP: number): string {
     ipAddress += item.toString(16).padStart(2, "0");
   });
 
+  let currentRating = Math.round(drive.currentRating * 10) * 10;
+
   const pnioData = `REDUNDANT 
 BEGIN
   ASSET_ID "DEDC15EAB48643FCA8939616B69B1C4A"
@@ -266,11 +268,11 @@ LOCAL_IN_ADDRESSES
 LOCAL_OUT_ADDRESSES 
   ADDRESS  ${drive.startAddress}, 0, 12, ${drivePIP}, 0, 0
 PARAMETER 
-  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${drive.currentRating}"
-  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${drive.currentRating}"
+  "UMC100_SETTING_IE_1 PRDIndex 0 DataID 0", "${currentRating}"
+  "UMC100_SETTING_IE_2 PRDIndex 0 DataID 32", "${currentRating}"
   "UMC100_YD_STARTING_TIME PRDIndex 0 DataID 64", "600"
   "UMC100_CURRENT_FACTOR PRDIndex 0 DataID 80", "${
-    drive.currentRating > 60 ? 4620 : 100
+    currentRating > 6000 ? 4620 : 100
   }"
   "UMC100_COOLING_TIME PRDIndex 0 DataID 96", "120"
   "UMC100_Earth_Flt_Trip_Level PRDIndex 0 DataID 112", "255"

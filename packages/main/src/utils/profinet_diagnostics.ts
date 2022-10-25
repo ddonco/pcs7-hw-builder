@@ -250,7 +250,7 @@ export function buildAIDiagnostics(
     diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
-    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "0"\n`;
   });
 
   return (
@@ -345,7 +345,7 @@ export function buildAODiagnostics(
     diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
-    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+!channel.spare}"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "0"\n`;
   });
 
   return (

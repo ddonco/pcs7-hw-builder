@@ -18,9 +18,10 @@ class Drive {
 
 export class ABBUMC100 extends Drive {
   name: string;
+  description: string;
   type: string;
   partNumber: string = "1SAJ263000R0100";
-  description: string = "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>";
+  moduleType: string = "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>";
   slot1: string = "UMC100.3";
   totalInBytes: number = 16;
   totalOutBytes: number = 12;
@@ -32,6 +33,7 @@ export class ABBUMC100 extends Drive {
 
   constructor(
     name: string,
+    description: string,
     nodeAddress: number,
     ioSubSystem: number,
     startAddress: number,
@@ -41,6 +43,7 @@ export class ABBUMC100 extends Drive {
   ) {
     super();
     this.name = name;
+    this.description = description;
     this.type = type;
     this.nodeAddress = nodeAddress;
     this.ioSubSystem = ioSubSystem;
@@ -52,9 +55,10 @@ export class ABBUMC100 extends Drive {
 
 export class ABBVFD extends Drive {
   name: string;
+  description: string;
   type: string = "VFD";
   partNumber: string = "6438177287452";
-  description: string = "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>";
+  moduleType: string = "GSDML-V2.33-ABB-FENA-20170914.xml<FENA_DAP_V4>";
   slot1: string = "PPO Type 6";
   totalInBytes: number = 20;
   totalOutBytes: number = 20;
@@ -65,6 +69,7 @@ export class ABBVFD extends Drive {
 
   constructor(
     name: string,
+    description: string,
     nodeAddress: number,
     ioSubSystem: number,
     startAddress: number,
@@ -72,6 +77,7 @@ export class ABBVFD extends Drive {
   ) {
     super();
     this.name = name;
+    this.description = description;
     this.nodeAddress = nodeAddress;
     this.ioSubSystem = ioSubSystem;
     this.startAddress = startAddress;

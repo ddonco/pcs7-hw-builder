@@ -200,7 +200,8 @@ export function buildDrivesConfig(
           SYMBOLTABLE_IN_TYPE.padEnd(5, " ") +
           wordAddress.toString().padEnd(7, " ") +
           SYMBOLTABLE_DATATYPE.padEnd(10, " ") +
-          drives[node].description; // ********** Needs actual description ***********
+          drives[node].description + // ********** Needs actual description ***********
+          "\n";
         symbolTableStream.write(writeStr);
       }
 
@@ -216,7 +217,8 @@ export function buildDrivesConfig(
           SYMBOLTABLE_OUT_TYPE.padEnd(5, " ") +
           wordAddress.toString().padEnd(7, " ") +
           SYMBOLTABLE_DATATYPE.padEnd(10, " ") +
-          drives[node].description; // ********** Needs actual description ***********
+          drives[node].description + // ********** Needs actual description ***********
+          "\n";
         symbolTableStream.write(writeStr);
       }
     }
