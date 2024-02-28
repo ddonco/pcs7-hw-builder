@@ -40,13 +40,6 @@
       "error",
       "always"
     ],
-    /**
-     * This will make the history of changes in the hit a little cleaner
-     */
-
-    /**
-     * Just for beauty
-     */
     // "quotes": [
     //   "warn", "single"
     // ]
