@@ -5,7 +5,7 @@ import { URL } from "url";
 async function createWindow() {
   const browserWindow = new BrowserWindow({
     show: false, // Use 'ready-to-show' event to show window
-    width: 880,
+    width: 1050,
     height: 900,
     webPreferences: {
       nativeWindowOpen: true,

@@ -6,11 +6,15 @@ import {
   DO_6DL11326BH000PH1,
   AI_6DL11346TH000PH1,
   AO_6DL11356TF000PH1,
-  HWModule,
 } from "./hw_module";
-import { ABBUMC100, ABBVFD } from "./drive_module";
+import type { HWModule } from "./hw_module";
+import {
+  ABBUMC100,
+  ABBVFD,
+  SIEMENSSIMOCODE,
+  SIEMENSS120,
+} from "./drive_module";
 import { hwBuilderLogger } from "./logger";
-import { createConditionalExpression } from "@vue/compiler-core";
 
 const childLogger = hwBuilderLogger.child({ component: "io-parser" });
 
@@ -18,9 +22,29 @@ const DI_MODULE = "DI";
 const DO_MODULE = "DO";
 const AI_MODULE = "AI";
 const AO_MODULE = "AO";
-const VFD_MODULE = "VFD";
-const FVNR_MODULE = "FVNR";
-const FVR_MODULE = "FVR";
+// const VFD_MODULE = "VFD";
+// const FVNR_MODULE = "FVNR";
+// const FVR_MODULE = "FVR";
+const DriveMap: Record<
+  string,
+  new (
+    name: string,
+    description: string,
+    nodeAddress: number,
+    ioSubSystem: number,
+    startAddress: number,
+    ipAddress: number[],
+    type: string,
+    telegramType: string,
+    currentRating: number,
+    mcc: string
+  ) => any
+> = {
+  ABB_UMC100: ABBUMC100,
+  ABB_VFD: ABBVFD,
+  SIEMENS_SIMOCODE: SIEMENSSIMOCODE,
+  SIEMENS_S120: SIEMENSS120,
+};
 const DIGITAL_START_ADDRESS = 0;
 const ANALOG_START_ADDRESS = 512;
 
@@ -52,9 +76,11 @@ export function parseAssignedIO(
     rows: data.slice(1, data.length),
   });
 
-  df = df.orderBy((row: any) => row[ioColumnNames.channel]);
-  df = df.orderBy((row: any) => row[ioColumnNames.slot]);
-  const dfArray = df.orderBy((row: any) => row[ioColumnNames.rack]).toArray();
+  let dfOrdered = df.orderBy((row: any) => row[ioColumnNames.channel]);
+  dfOrdered = dfOrdered.orderBy((row: any) => row[ioColumnNames.slot]);
+  const dfArray = dfOrdered
+    .orderBy((row: any) => row[ioColumnNames.rack])
+    .toArray();
 
   let hardwareRacks: { [rack: string]: { [slot: string]: any } } = {};
   let hwModule: any;
@@ -85,17 +111,16 @@ export function parseAssignedIO(
     if (description === "undefined" || typeof description === "undefined")
       description = "";
 
-    let channelIsSpare = false;
-    if (tagName.toUpperCase().includes("SPARE")) channelIsSpare = true;
-
     if (
       typeof tagName === "undefined" ||
       typeof description === "undefined" ||
       typeof channelType === "undefined" ||
       typeof rack === "undefined" ||
+      isNaN(rack) ||
       typeof slot === "undefined" ||
+      isNaN(slot) ||
       typeof channel === "undefined" ||
-      typeof channelIsSpare === "undefined"
+      isNaN(channel)
     ) {
       childLogger.error(
         `a required column has been found with undefined value, this tag has been skipped`,
@@ -144,8 +169,7 @@ export function parseAssignedIO(
             slot,
             channel,
             tagName,
-            description,
-            channelIsSpare
+            description
           );
         } else {
           // No module (slot) exists for this channel so build module,
@@ -162,8 +186,7 @@ export function parseAssignedIO(
             slot,
             channel,
             tagName,
-            description,
-            channelIsSpare
+            description
           );
         }
       } else {
@@ -182,8 +205,7 @@ export function parseAssignedIO(
           slot,
           channel,
           tagName,
-          description,
-          channelIsSpare
+          description
         );
       }
     } catch (error) {
@@ -245,7 +267,9 @@ export function parseDrives(
     let description: string = dfArray[row][columnNames.description];
     const ipAddress: string = dfArray[row][columnNames.ipAddress];
     let driveType: string = dfArray[row][columnNames.driveType];
+    let telegramType: string = dfArray[row][columnNames.telegramType];
     let ampRating: number = parseFloat(dfArray[row][columnNames.ampRating]);
+    let mcc: string = dfArray[row][columnNames.mcc];
     ipAddressArr = [];
 
     if (columnNames.nodeAddress !== "") {
@@ -284,16 +308,25 @@ export function parseDrives(
       continue;
     }
 
+    if (typeof telegramType === "undefined") {
+      telegramType = "";
+    }
+    if (typeof mcc === "undefined") {
+      mcc = "";
+    }
+
     ipAddress.split(".").forEach((item, _) => {
       ipAddressArr.push(parseInt(item, 10));
     });
 
-    if (typeIdentifier.vfd.indexOf(driveType) > -1) {
-      driveType = "VFD";
-    } else if (typeIdentifier.fvnr.indexOf(driveType) > -1) {
-      driveType = "FVNR";
-    } else if (typeIdentifier.fvr.indexOf(driveType) > -1) {
-      driveType = "FVR";
+    if (typeIdentifier.abb_vfd.indexOf(driveType) > -1) {
+      driveType = "ABB_UMC100";
+    } else if (typeIdentifier.abb_umc.indexOf(driveType) > -1) {
+      driveType = "ABB_VFD";
+    } else if (typeIdentifier.siemens_vfd.indexOf(driveType) > -1) {
+      driveType = "SIEMENS_S120";
+    } else if (typeIdentifier.siemens_simocode.indexOf(driveType) > -1) {
+      driveType = "SIEMENS_SIMOCODE";
     } else {
       childLogger.error(
         `drive type not recognized - drive will be skipped, row ${row}`,
@@ -316,12 +349,25 @@ export function parseDrives(
         tagName,
         description,
         driveType,
+        telegramType,
         ampRating,
-        addressLookup,
         ipAddressArr,
-        currentNode
+        currentNode,
+        mcc,
+        addressLookup
       );
-      drives[currentNode] = driveModule;
+      if (Object.keys(driveModule).length === 0) {
+        childLogger.error(
+          `drive type not recognized - drive will be skipped, row ${row}`,
+          {
+            tagName: tagName,
+            driveType: driveType,
+            ampRating: ampRating,
+          }
+        );
+      } else {
+        drives[currentNode] = driveModule;
+      }
     } catch (error) {
       childLogger.error(`build drive failed, row ${row}`, {
         tagName: tagName,
@@ -403,10 +449,12 @@ function buildDrive(
   tagName: string,
   description: string,
   driveType: string,
+  telegramType: string,
   ampRating: number,
-  addressLookup: { [type: string]: number },
   ipAddress: number[],
-  nodeAddress: number
+  nodeAddress: number,
+  mcc: string,
+  addressLookup: { [type: string]: number }
 ): [any, { [type: string]: number }] {
   let nextNodeAddress: number = 0;
   if (nodeAddress > 0) {
@@ -415,21 +463,11 @@ function buildDrive(
     nextNodeAddress = addressLookup.nextNodeAddress;
   }
 
-  if (driveType === VFD_MODULE) {
-    const driveModule = new ABBVFD(
-      tagName,
-      description,
-      nextNodeAddress,
-      addressLookup.ioSubSystem,
-      addressLookup.nextDriveAddress,
-      ipAddress
-    );
-    addressLookup.nextNodeAddress = driveModule.nextNodeAddress();
-    addressLookup.nextDriveAddress = driveModule.nextStartAddress();
-    return [driveModule, addressLookup];
-  }
-  if (driveType === FVNR_MODULE || driveType === FVR_MODULE) {
-    const driveModule = new ABBUMC100(
+  telegramType = telegramType.toLowerCase();
+
+  console.log(`${tagName} - ${telegramType}`);
+  if (driveType in DriveMap) {
+    const driveModule = new DriveMap[driveType](
       tagName,
       description,
       nextNodeAddress,
@@ -437,11 +475,12 @@ function buildDrive(
       addressLookup.nextDriveAddress,
       ipAddress,
       driveType,
-      ampRating
+      telegramType,
+      ampRating,
+      mcc
     );
     addressLookup.nextNodeAddress = driveModule.nextNodeAddress();
     addressLookup.nextDriveAddress = driveModule.nextStartAddress();
-
     return [driveModule, addressLookup];
   }
 
@@ -462,14 +501,14 @@ export function parseRawIO(
     rows: data.slice(1, data.length),
   });
 
-  df = df.orderBy((row: any) => row.Tagnames);
-  const dfArray = df.orderBy((row: any) => row.Type).toArray();
+  const dfOrdered = df.orderBy((row: any) => row.Tagnames);
+  const dfArray = dfOrdered.orderBy((row: any) => row.Type).toArray();
 
-  let addressLookup: { [type: string]: number } = {
+  const addressLookup: { [type: string]: number } = {
     nextDigitalAddress: DIGITAL_START_ADDRESS,
     nextAnalogAddress: ANALOG_START_ADDRESS,
   };
-  let hwModules: { [moduleType: string]: HWModule[] } = {
+  const hwModules: { [moduleType: string]: HWModule[] } = {
     diModules: [],
     doModules: [],
     aiModules: [],
@@ -488,9 +527,6 @@ export function parseRawIO(
     if (description === "undefined" || typeof description === "undefined")
       description = "";
 
-    let channelIsSpare = false;
-    if (tagName.toUpperCase().includes("SPARE")) channelIsSpare = true;
-
     if (channelType === DI_MODULE) {
       if (
         hwModules["diModules"].length <= 0 ||
@@ -504,8 +540,7 @@ export function parseRawIO(
         0,
         openDiModule.nextOpenChannel,
         tagName,
-        description,
-        channelIsSpare
+        description
       );
     }
     if (channelType === DO_MODULE) {
@@ -521,8 +556,7 @@ export function parseRawIO(
         0,
         openDoModule.nextOpenChannel,
         tagName,
-        description,
-        channelIsSpare
+        description
       );
     }
     if (channelType === AI_MODULE) {
@@ -538,8 +572,7 @@ export function parseRawIO(
         0,
         openAiModule.nextOpenChannel,
         tagName,
-        description,
-        channelIsSpare
+        description
       );
     }
     if (channelType === AO_MODULE) {
@@ -555,8 +588,7 @@ export function parseRawIO(
         0,
         openAoModule.nextOpenChannel,
         tagName,
-        description,
-        channelIsSpare
+        description
       );
     }
   }

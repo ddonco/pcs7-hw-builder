@@ -6,13 +6,6 @@ export default {
   components: {
     NavSideBar,
   },
-  // mounted() {
-  //   this.$nextTick(function () {
-  //     window.api.receive("fromMain", (data: any) => {
-  //       console.log(`Received: ${JSON.stringify(data)}`);
-  //     });
-  //   });
-  // },
 };
 </script>
 

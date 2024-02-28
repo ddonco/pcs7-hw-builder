@@ -7,6 +7,9 @@
     /** @see https://eslint.vuejs.org/rules/ */
     "plugin:vue/vue3-strongly-recommended"
   ],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
     "vue/html-self-closing": ["error", {
       "html": {
@@ -15,7 +18,8 @@
         "component": "any"
       },
       "svg": "always",
-      "math": "always"
+      "math": "always",
+      "comma-dangle": ["warn", "never"]
     }],
     "vue/v-on-style": 0,
     "@typescript-eslint/no-explicit-any": "off"

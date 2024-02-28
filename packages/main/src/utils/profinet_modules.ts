@@ -89,6 +89,7 @@ export function buildAIConfig(
   hartModuleType: string,
   channels: Channel[],
   enableAllChannels: boolean,
+  enableHartChannels: boolean,
   pip: number
 ): string {
   const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
@@ -100,7 +101,11 @@ export function buildAIConfig(
   LOCAL_IN_ADDRESSES 
     ADDRESS  ${moduleAddress}, 0, ${moduleBytesSize}, ${pip}, 0, 32\n`;
   const symbols = buildDiagnosticSymbols("AI", channels);
-  const diagnostics = buildAIDiagnostics(channels, enableAllChannels);
+  const diagnostics = buildAIDiagnostics(
+    channels,
+    enableAllChannels,
+    enableHartChannels
+  );
   const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   const hartModules = buildHartConfig(
@@ -125,6 +130,7 @@ export function buildAOConfig(
   hartModuleType: string,
   channels: Channel[],
   enableAllChannels: boolean,
+  enableHartChannels: boolean,
   pip: number
 ): string {
   const begin = `IOSUBSYSTEM 100, IOADDRESS ${("00" + rackNumber).slice(
@@ -138,7 +144,11 @@ export function buildAOConfig(
   LOCAL_OUT_ADDRESSES
     ADDRESS  ${moduleOutAddress}, 0, ${moduleOutBytesSize}, ${pip}, 0, 32\n`;
   const symbols = buildDiagnosticSymbols("AO", channels);
-  const diagnostics = buildAODiagnostics(channels, enableAllChannels);
+  const diagnostics = buildAODiagnostics(
+    channels,
+    enableAllChannels,
+    enableHartChannels
+  );
   const end = `  POTENTIAL_GROUP, "NEW_GROUP"
   END\n`;
   const hartModules = buildHartConfig(

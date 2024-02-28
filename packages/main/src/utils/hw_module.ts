@@ -37,18 +37,38 @@ export class HWModule {
   totalOutBytes: number = 2;
   revision: string = "1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
+
+  constructor(startAddress: number = 0, rack: number = 0, slot: number = 0) {
+    this.startAddress = startAddress;
+    this.rack = rack;
+    this.slot = slot;
+
+    for (let i = 0; i <= this.channelCount; i++) {
+      this.channels.push(
+        new Channel(
+          i,
+          (this.startAddress + i * this.bytesPerChannel).toFixed(1),
+          this.type,
+          `SPARE_R${("00" + this.rack).slice(-2)}S${("00" + this.slot).slice(
+            -2
+          )}C${("00" + i).slice(-2)}`,
+          "",
+          true
+        )
+      );
+    }
+  }
 
   assignChannel(
     rack: number,
     slot: number,
     channelNumber: number,
     tagName: string,
-    description: string,
-    spare: boolean = false
+    description: string
   ): boolean {
     // Check if rack and slot assignments for the channel match this modules rack and slot assignments
     if (rack !== this.rack || slot !== this.slot) {
@@ -75,9 +95,13 @@ export class HWModule {
       );
       return false;
     }
+
+    if (!tagName.toUpperCase().includes("SPARE")) {
+      this.channels[channelNumber - 1].spare = false;
+    }
+
     this.channels[channelNumber - 1].tagName = tagName;
     this.channels[channelNumber - 1].description = description;
-    this.channels[channelNumber - 1].spare = spare;
     this.nextOpenChannel++;
     if (this.nextOpenChannel > this.channelCount) this.nextOpenChannel = -1;
     // Channel was assigned
@@ -129,7 +153,7 @@ export class DI_6DL11316GF000PK0 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -140,7 +164,7 @@ export class DI_6DL11316GF000PK0 extends HWModule {
     this.rack = rack;
     this.slot = slot;
 
-    for (let i = 1; i <= this.channelCount; i++) {
+    for (let i = 0; i < this.channelCount; i++) {
       this.channels.push(
         new Channel(
           i,
@@ -167,7 +191,7 @@ export class DI_6DL11316BH000PH1 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -178,7 +202,7 @@ export class DI_6DL11316BH000PH1 extends HWModule {
     this.rack = rack;
     this.slot = slot;
 
-    for (let i = 1; i <= this.channelCount; i++) {
+    for (let i = 0; i < this.channelCount; i++) {
       this.channels.push(
         new Channel(
           i,
@@ -205,7 +229,7 @@ export class DO_6DL11326BH000PH1 extends HWModule {
   totalOutBytes: number = 2;
   revision: string = "1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -216,7 +240,7 @@ export class DO_6DL11326BH000PH1 extends HWModule {
     this.rack = rack;
     this.slot = slot;
 
-    for (let i = 1; i <= this.channelCount; i++) {
+    for (let i = 0; i < this.channelCount; i++) {
       this.channels.push(
         new Channel(
           i,
@@ -245,7 +269,7 @@ export class AI_6DL11346TH000PH1 extends HWModule {
   totalOutBytes: number = 0;
   revision: string = "1.1";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -256,7 +280,7 @@ export class AI_6DL11346TH000PH1 extends HWModule {
     this.rack = rack;
     this.slot = slot;
 
-    for (let i = 1; i <= this.channelCount; i++) {
+    for (let i = 0; i < this.channelCount; i++) {
       this.channels.push(
         new Channel(
           i,
@@ -285,7 +309,7 @@ export class AO_6DL11356TF000PH1 extends HWModule {
   totalOutBytes: number = 16;
   revision: string = "1.0";
   channels: Channel[] = [];
-  nextOpenChannel: number = 1; // Channel count starts at 1
+  nextOpenChannel: number = 0; // Channel count starts at 0
   startAddress: number = 0;
   rack: number = 0;
   slot: number = 0;
@@ -296,7 +320,7 @@ export class AO_6DL11356TF000PH1 extends HWModule {
     this.rack = rack;
     this.slot = slot;
 
-    for (let i = 1; i <= this.channelCount; i++) {
+    for (let i = 0; i < this.channelCount; i++) {
       this.channels.push(
         new Channel(
           i,

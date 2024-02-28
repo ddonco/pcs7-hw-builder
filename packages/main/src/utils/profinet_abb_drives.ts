@@ -1,4 +1,4 @@
-import { ABBUMC100, ABBVFD } from "./drive_module";
+import type { ABBUMC100, ABBVFD } from "./drive_module";
 
 export function buildUMC100(drive: ABBUMC100, drivePIP: number): string {
   const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.4-ABB-PNU32-20210223.xml<DAP_PNU32>", "${drive.name}"\n`;
@@ -14,11 +14,11 @@ export function buildUMC100(drive: ABBUMC100, drivePIP: number): string {
   }
 
   let ipAddress = "";
-  drive.ipAddress.forEach((item, index) => {
+  drive.ipAddress.forEach((item, _) => {
     ipAddress += item.toString(16).padStart(2, "0");
   });
 
-  let currentRating = Math.round(drive.currentRating * 10) * 10;
+  const currentRating = Math.round(drive.currentRating * 10) * 10;
 
   const pnioData = `REDUNDANT 
 BEGIN
@@ -481,7 +481,7 @@ export function buildACSVFD(drive: ABBVFD, drivePIP: number): string {
   const slot1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, "GSDML-V2.4-ABB-FPNO-20201118.xml<ID_MODULE_PPO6>", "PPO Type 6"\n`;
 
   let ipAddress = "";
-  drive.ipAddress.forEach((item, index) => {
+  drive.ipAddress.forEach((item, _) => {
     ipAddress += item.toString(16).padStart(2, "0");
   });
 

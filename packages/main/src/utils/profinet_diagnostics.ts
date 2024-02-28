@@ -2,7 +2,8 @@ import { Channel } from "./hw_module";
 
 export function buildAIDiagnostics(
   channels: Channel[],
-  enableAllChannels: boolean
+  enableAllChannels: boolean,
+  enableHartChannels: boolean
 ): string {
   const staticBeginString = `PARAMETER 
   VERSION_HIGH, "0"
@@ -19,8 +20,7 @@ export function buildAIDiagnostics(
   NUMBER_OF_FOLLOWING_CHANNEL_PARAMETER_BLOCKS, "16"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "14"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
-  const staticEndString = `
-  SMOOTHING, AI , 0, "NONE"
+  const staticSmoothing = `  SMOOTHING, AI , 0, "NONE"
   SMOOTHING, AI , 1, "NONE"
   SMOOTHING, AI , 2, "NONE"
   SMOOTHING, AI , 3, "NONE"
@@ -51,8 +51,8 @@ export function buildAIDiagnostics(
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 12, "10_HZ"
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 13, "10_HZ"
   INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 14, "10_HZ"
-  INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 15, "10_HZ"
-  FAILURE_MONITORING, AI , 0, "DEACTIVATED"
+  INTERFERENCE_FREQUENCY_SUPPRESSION, AI , 15, "10_HZ"\n`;
+  const staticEndString = `  FAILURE_MONITORING, AI , 0, "DEACTIVATED"
   FAILURE_MONITORING, AI , 1, "DEACTIVATED"
   FAILURE_MONITORING, AI , 2, "DEACTIVATED"
   FAILURE_MONITORING, AI , 3, "DEACTIVATED"
@@ -250,7 +250,9 @@ export function buildAIDiagnostics(
     diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
-    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "0"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+(
+      !channel.spare && enableHartChannels
+    )}"\n`;
   });
 
   return (
@@ -262,13 +264,15 @@ export function buildAIDiagnostics(
     diagnosticOverflow +
     diagnosticUnderflow +
     diagnosticHart +
+    staticSmoothing +
     staticEndString
   );
 }
 
 export function buildAODiagnostics(
   channels: Channel[],
-  enableAllChannels: boolean
+  enableAllChannels: boolean,
+  enableHartChannels: boolean
 ): string {
   const staticBeginString = `PARAMETER 
   VERSION_HIGH, "0"
@@ -284,8 +288,7 @@ export function buildAODiagnostics(
   NUMBER_OF_FOLLOWING_CHANNEL_PARAMETER_BLOCKS, "8"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "8"
   DIAGNOSTICS_MISSING_SUPPLY_VOLTAGE_L, "1"\n`;
-  const staticEndString = `
-  REACTION_TO_CPU_STOP, AO , 0, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
+  const staticEndString = `  REACTION_TO_CPU_STOP, AO , 0, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
   REACTION_TO_CPU_STOP, AO , 1, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
   REACTION_TO_CPU_STOP, AO , 2, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
   REACTION_TO_CPU_STOP, AO , 3, "OUTPUTS_WITHOUT_VOLTAGE_OR_CURRENT"
@@ -345,7 +348,9 @@ export function buildAODiagnostics(
     diagnosticWireBreak += `  DIAGNOSTICS_WIRE_BREAK, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticOverflow += `  DIAGNOSTICS_OVERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
     diagnosticUnderflow += `  DIAGNOSTICS_UNDERFLOW, AI , ${index}, "${+!channel.spare}"\n`;
-    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "0"\n`;
+    diagnosticHart += `  DIAGNOSTICS_HART, AI , ${index}, "${+(
+      !channel.spare && enableHartChannels
+    )}"\n`;
   });
 
   return (
@@ -440,8 +445,7 @@ export function buildDI16Diagnostics(
   RED_LADDR_LOW, "0"
   NUMBER_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "16"
   LENGTH_OF_A_FOLLOWING_CHANNEL_PARAMETER_BLOCK, "4"\n`;
-  const staticEndString = `
-  INPUT_DELAY, DI , 0, "3.2_MS"
+  const staticEndString = `  INPUT_DELAY, DI , 0, "3.2_MS"
   INPUT_DELAY, DI , 1, "3.2_MS"
   INPUT_DELAY, DI , 2, "3.2_MS"
   INPUT_DELAY, DI , 3, "3.2_MS"

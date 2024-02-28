@@ -70,8 +70,12 @@ export default defineComponent({
       store.dispatch("setGroupIOAddresses", grouped);
     };
 
-    const setEnableChannels = (enable: boolean) => {
+    const setEnableAllChannels = (enable: boolean) => {
       store.dispatch("setEnableAllChannels", enable);
+    };
+
+    const setEnableHartChannels = (enable: boolean) => {
+      store.dispatch("setEnableHartChannels", enable);
     };
 
     const generateHwConfig = (event: any) => {
@@ -80,6 +84,7 @@ export default defineComponent({
           generateHwConfig: JSON.stringify(store.state.startAddress),
           buildOptions: JSON.stringify({
             enableAllChannels: store.state.enableAllChannels,
+            enableHartChannels: store.state.enableHartChannels,
             analogPIP: store.state.pips.analogPIP,
             digitalPIP: store.state.pips.digitalPIP,
           }),
@@ -91,7 +96,8 @@ export default defineComponent({
       parseHeaders,
       parseAssignedIO,
       getGroupedAddresses,
-      setEnableChannels,
+      setEnableAllChannels,
+      setEnableHartChannels,
       generateHwConfig,
       ioFilePath: "",
     };
@@ -106,6 +112,11 @@ export default defineComponent({
       const store = useStore();
       let enableAllChannels = store.state.enableAllChannels;
       return enableAllChannels;
+    },
+    enableHartChannelsModel: function () {
+      const store = useStore();
+      let enableHartChannels = store.state.enableHartChannels;
+      return enableHartChannels;
     },
   },
   methods: {
@@ -125,7 +136,11 @@ export default defineComponent({
     },
     enableAllChannels: function (event: any) {
       let enable = event.target.checked;
-      this.setEnableChannels(enable);
+      this.setEnableAllChannels(enable);
+    },
+    enableHartChannels: function (event: any) {
+      let enable = event.target.checked;
+      this.setEnableHartChannels(enable);
     },
   },
 });
@@ -171,7 +186,7 @@ export default defineComponent({
         </div>
         <div class="flex flex-row pb-4">
           <div class="w-full">
-            <div class="flex pt-1 text-center divide-x divide-gray-500">
+            <div class="flex pt-1 text-center text-sm divide-x divide-gray-500">
               <ColumnNameConfig
                 :column-name="'Tag Name'"
                 :column-id="'tagName'"
@@ -297,6 +312,15 @@ export default defineComponent({
                   type="checkbox"
                   class="checked:bg-blue-500"
                   v-on:change="enableAllChannels"
+                />
+              </div>
+              <div class="pl-15 pr-2">Enable Hart Channels</div>
+              <div class="flex items-center">
+                <input
+                  v-model="enableHartChannelsModel"
+                  type="checkbox"
+                  class="checked:bg-blue-500"
+                  v-on:change="enableHartChannels"
                 />
               </div>
             </div>

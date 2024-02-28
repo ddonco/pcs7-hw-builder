@@ -7,7 +7,6 @@ export const hwBuilderLogger = winston.createLogger({
     winston.format.json(),
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" })
   ),
-  defaultMeta: { service: "main" },
   transports: [
     new winston.transports.File({
       filename: "logs/hw_builder.log",

@@ -12,6 +12,7 @@ export interface State {
   driveInfo: { [type: string]: number };
   groupIOAddresses: boolean;
   enableAllChannels: boolean;
+  enableHartChannels: boolean;
   pips: { [type: string]: number };
   logs: string[];
 }
@@ -40,9 +41,10 @@ export const store = createStore<State>({
       do: [],
       ai: [],
       ao: [],
-      vfd: [],
-      fvnr: [],
-      fvr: [],
+      abb_vfd: [],
+      abb_umc: [],
+      siemens_vfd: [],
+      siemens_simocode: [],
     },
     startAddress: {
       di: 0,
@@ -57,6 +59,7 @@ export const store = createStore<State>({
     driveInfo: {},
     groupIOAddresses: false,
     enableAllChannels: false,
+    enableHartChannels: false,
     pips: {
       analogPIP: 3,
       digitalPIP: 4,
@@ -82,7 +85,9 @@ export const store = createStore<State>({
         column === "nodeAddress" ||
         column === "ioType" ||
         column === "driveType" ||
-        column === "ampRating"
+        column === "ampRating" ||
+        column === "telegramType" ||
+        column === "mcc"
       ) {
         state.columnNames[column] = header;
       }
@@ -95,24 +100,20 @@ export const store = createStore<State>({
     SET_TYPE_IDENTIFIERS(state, [ioType, identifiers]) {
       if (ioType === "DI") {
         state.typeIdentifiers.di = identifiers;
-      }
-      if (ioType === "DO") {
+      } else if (ioType === "DO") {
         state.typeIdentifiers.do = identifiers;
-      }
-      if (ioType === "AI") {
+      } else if (ioType === "AI") {
         state.typeIdentifiers.ai = identifiers;
-      }
-      if (ioType === "AO") {
+      } else if (ioType === "AO") {
         state.typeIdentifiers.ao = identifiers;
-      }
-      if (ioType === "VFD") {
-        state.typeIdentifiers.vfd = identifiers;
-      }
-      if (ioType === "FVNR") {
-        state.typeIdentifiers.fvnr = identifiers;
-      }
-      if (ioType === "FVR") {
-        state.typeIdentifiers.fvr = identifiers;
+      } else if (ioType === "ABB VFD") {
+        state.typeIdentifiers.abb_vfd = identifiers;
+      } else if (ioType === "ABB UMC") {
+        state.typeIdentifiers.abb_umc = identifiers;
+      } else if (ioType === "Siemens VFD") {
+        state.typeIdentifiers.siemens_vfd = identifiers;
+      } else if (ioType === "Siemens SIMOCODE") {
+        state.typeIdentifiers.siemens_simocode = identifiers;
       }
     },
     SET_HARDWARE_INFO(state, hardwareInfo: {}) {
@@ -132,6 +133,9 @@ export const store = createStore<State>({
     },
     SET_ENABLE_ALL_CHANNELS(state, enableAllChannels) {
       state.enableAllChannels = enableAllChannels;
+    },
+    SET_ENABLE_HART_CHANNELS(state, enableHartChannels) {
+      state.enableHartChannels = enableHartChannels;
     },
     SET_PIP(state, [pip, value]) {
       state.pips[pip] = value;
@@ -173,6 +177,9 @@ export const store = createStore<State>({
     },
     setEnableAllChannels({ commit }, enableAllChannels) {
       commit("SET_ENABLE_ALL_CHANNELS", enableAllChannels);
+    },
+    setEnableHartChannels({ commit }, enableHartChannels) {
+      commit("SET_ENABLE_HART_CHANNELS", enableHartChannels);
     },
     setPIP({ commit }, [pip, value]) {
       commit("SET_PIP", [pip, value]);

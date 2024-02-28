@@ -33,6 +33,7 @@ let userAddressParams: { [ioType: string]: string } = {};
 let startIpAddress: string;
 let buildOptions: { [option: string]: any } = {
   enableAllChannels: false,
+  enableHartChannels: false,
   analogPIP: 3,
   digitalPIP: 4,
   drivePIP: 4,

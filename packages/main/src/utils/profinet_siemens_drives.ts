@@ -1,0 +1,574 @@
+import type { SIEMENSSIMOCODE, SIEMENSS120 } from "./drive_module";
+
+export function buildSimocode(
+  drive: SIEMENSSIMOCODE,
+  drivePIP: number
+): string {
+  const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "GSDML-V2.43-SIEMENS-SIMOCODEproVPN-20220817.xml<DAP 1_V3>", "${drive.name}"\n`;
+  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "GSDML-V2.43-SIEMENS-SIMOCODEproVPN-20220817.xml<DAP 1_V3>", "${drive.name}"\n`;
+  const slot0Sub1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_S7H_IO_NORM_INTERFACE_CT", "PN-IO"\n`;
+  const slot0Sub2Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 2, "GSDML-V2.43-SIEMENS-SIMOCODEproVPN-20220817.xml<DAP 1_V3>", "Port1"\n`;
+  const slot0Sub3Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 3, "GSDML-V2.43-SIEMENS-SIMOCODEproVPN-20220817.xml<DAP 1_V3>", "Port2"\n`;
+  const slot1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, "GSDML-V2.43-SIEMENS-SIMOCODEproVPN-20220817.xml<${drive.slot1XmlVersion}>", "${drive.slot1}"\n`;
+
+  let ipAddress = "";
+  drive.ipAddress.forEach((item, _) => {
+    ipAddress += item.toString(16).padStart(2, "0");
+  });
+
+  const pnioData = `REDUNDANT 
+  BEGIN
+    ASSET_ID "28268FA3E0954CB6873A5FFEE7BC2C16"
+    INSTALLATION_DATE ""
+    HAS_SHARED_SUBMODULES "0"
+    ADDITIONAL_INFORMATION ""
+    PDM_PARAM "0"
+    PLANT_LOCATION ""
+    PN_HW_RELEASE "20"
+    PN_SW_RELEASE "V3.0.0"
+    PN_VENDOR_ID "42"
+    PN_FIXED_UPDATE_TIME "1"
+    PN_MIN_VERSION "V2.25"
+    PN_DEVICE_ID "2308"
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "1"
+    POS_X "1015"
+    POS_Y "267"
+    SIZE_X "78"
+    SIZE_Y "64"
+    MODULE_ADD_FLAGS "0"
+    PN_DEVICE_SCF_L "32"
+    CAX_APP_ID ""
+    PN_GENERATED_SCF "0"
+    SHARED_PROXY_DATA ""
+    PN_WATCHDOGFACTOR "3"
+    OBJECT_COPYABLE "1"
+    CREATOR ""
+    LIST_SUBMODULES ""
+    COMMENT ""
+    PN_DEVICE_UPD_TIME "128"
+    PLANT_DESIGNATION ""
+    IRT_GROUP_NR "1"
+  END\n`;
+
+  const slot0 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "82566A44BFF248888A0F91C4BB97383C"
+    MACADDRESS "080006010000"
+    IPACTIVE "1"
+    IPADDRESS "${ipAddress}"
+    SUBNETMASK "FFFFFF00"
+    ROUTERADDRESS "C0A80006"
+    ROUTERACTIVE "0"
+    ISOACTIVE "0"
+    PN_TI "0"
+    PN_TO "0"
+    PN_EQUIDISTANT_CYCLE "0"
+    COUPLING_UID ""
+    PN_MODULE_IDENTNUMBER "784"
+    PN_HW_RELEASE "20"
+    PN_SUBMODULE_IDENTNUMBER "1"
+    PN_SW_RELEASE "V3.0.0"
+    PN_IPADDR_MODE_DEV "0"
+    PN_MIN_VERSION "V2.25"
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    POS_X "0"
+    POS_Y "0"
+    SIZE_X "0"
+    SIZE_Y "0"
+    MLFB "3UF7 011-1A*00-0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16327, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot0Sub1 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "CA5CCBB37ED14B1189509AA94BFE29C9"
+    PN_TI "0"
+    INSTALLATION_DATE ""
+    PN_TO "0"
+    NETWORK_COMPONENT_DIAG "1"
+    IRT_DETERMINATION_LEVEL "1"
+    PN_EQUIDISTANT_CYCLE "0"
+    NO_OF_EXT_CONTROLLER "0"
+    ADDITIONAL_INFORMATION ""
+    NO_SET_TO_MAX "0"
+    IRT_SYNC_FLAG "65280"
+    IRT_CACF "1"
+    IRT_DEVICE_CYCLE_GROUP ""
+    EXT_SENDCLOCK "32"
+    PN_DEVICE_FSU_PRIORITY "0"
+    PLANT_LOCATION ""
+    IRT_ADJUST_TITO "1"
+    IRT_PN_USER_RATIO "30"
+    MRP_CONFIGURATION "mrpdomain-1	0"
+    PN_SUBMODULE_IDENTNUMBER "2"
+    IRT_PTCP_SUBDOMAIN_ID_DATA ""
+    PN_MIN_VERSION "V2.0"
+    IRT_PTCP_SUBDOMAIN_ID_HASH ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    IRT_BANDWIDTH_OVERRIDE_ALLOWED "0"
+    IRT_OPTIMIZATION_STRUCT ""
+    IRT_DOMAIN_NAME "syncdomain-default"
+    POS_X "0"
+    IRT_SENDCLOCK_FACTOR "32"
+    POS_Y "0"
+    SIZE_X "0"
+    MRP_MULTI_CONFIGURATION ""
+    MRP_DIAGNOSIS "0"
+    SIZE_Y "0"
+    MRP_MULTI_DIAGNOSIS "0"
+    MRP_INSTANCES "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    PTCP_TIME_SYNC_ENABLED "0"
+    IRT_PN_RATIO "-1"
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    PLANT_DESIGNATION ""
+    IRT_SYNC_WHOLE_DEVICE "1"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16326, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot0Sub2 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "6771C893A36E4217B9DB873048234DFA"
+    IRT_FIBEROPTIC_CABLETYPE "0"
+    LINE_COMMENT ""
+    INSTALLATION_DATE ""
+    LINK_STATE_DIAG_NEW_VERSION "0"
+    LINE_DELAY "0"
+    S7H_IRT_PORT_THRESHOLD_SFP_L "0"
+    ADDITIONAL_INFORMATION ""
+    S7H_IRT_PORT_TXF_SFP_L "0"
+    S7H_IRT_PORT_RXL_SFP_L "0"
+    PLANT_LOCATION ""
+    LINK_STATE_DIAG_REQUIRE "0"
+    ETH_MEDIUM_RUNTIME_CHECK "1"
+    PORT_DEACTIVATED "0"
+    MRP_DOMAIN ""
+    PORT_DOMAIN_BOUNDARY "0"
+    PN_MIN_VERSION "V1.0"
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    PORT_DCP_BOUNDARY "0"
+    POS_X "0"
+    PORT_LLDP_BOUNDARY "0"
+    POS_Y "0"
+    PN_RINGSTATUS_STRUCT ""
+    SIZE_X "0"
+    IRT_LINE_RX_DELAY "0"
+    SIZE_Y "0"
+    MRP_INSTANCE_NUMBER "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    MULTICAST_BOUNDARY "0"
+    ETHERNET_MED_DUP "8"
+    PLANT_DESIGNATION ""
+    IRT_FIBEROPTIC_TYPE "0"
+    LINE_DELAY_SELECTOR "0"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16325, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot0Sub3 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "4111FD96C58C4CFC84575B23999EE140"
+    IRT_FIBEROPTIC_CABLETYPE "0"
+    LINE_COMMENT ""
+    INSTALLATION_DATE ""
+    LINK_STATE_DIAG_NEW_VERSION "0"
+    LINE_DELAY "600"
+    S7H_IRT_PORT_THRESHOLD_SFP_L "0"
+    ADDITIONAL_INFORMATION ""
+    S7H_IRT_PORT_TXF_SFP_L "0"
+    S7H_IRT_PORT_RXL_SFP_L "0"
+    PLANT_LOCATION ""
+    LINK_STATE_DIAG_REQUIRE "0"
+    ETH_MEDIUM_RUNTIME_CHECK "1"
+    PORT_DEACTIVATED "0"
+    MRP_DOMAIN ""
+    PORT_DOMAIN_BOUNDARY "0"
+    PN_MIN_VERSION "V1.0"
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    PORT_DCP_BOUNDARY "0"
+    POS_X "0"
+    PORT_LLDP_BOUNDARY "0"
+    POS_Y "0"
+    PN_RINGSTATUS_STRUCT ""
+    SIZE_X "0"
+    IRT_LINE_RX_DELAY "0"
+    SIZE_Y "0"
+    MRP_INSTANCE_NUMBER "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    MULTICAST_BOUNDARY "0"
+    ETHERNET_MED_DUP "8"
+    PLANT_DESIGNATION ""
+    IRT_FIBEROPTIC_TYPE "0"
+    LINE_DELAY_SELECTOR "0"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16324, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot1 = `BEGIN 
+  ASSET_ID "EEE390EA380E438B9707180C60D2D75C"
+  PN_TI "0"
+  PN_TO "0"
+  PN_EQUIDISTANT_CYCLE "0"
+  PN_MODULE_IDENTNUMBER "32"
+  PN_SUBMODULE_IDENTNUMBER "16"
+  PN_MIN_VERSION "V1.0"
+  PN_API "0"
+  GUI_HIDE "0"
+  OBJECT_REMOVEABLE "1"
+  PN_TRANSFERMODULE_UPD_TIME "0"
+  POS_X "0"
+  POS_Y "0"
+  SIZE_X "0"
+  SIZE_Y "0"
+  PNDX_MODE "0"
+  CAX_APP_ID ""
+  MLFB ""
+  OBJECT_COPYABLE "1"
+  CREATOR ""
+  COMMENT ""
+  IRT_GROUP_NR "1"
+LOCAL_IN_ADDRESSES 
+  ADDRESS  ${drive.startAddress}, 0, ${drive.totalInBytes}, ${drivePIP}, 0, 0
+LOCAL_OUT_ADDRESSES 
+  ADDRESS  ${drive.startAddress}, 0, ${drive.totalOutBytes}, ${drivePIP}, 0, 0
+END\n`;
+
+  return (
+    deviceHeader +
+    pnioData +
+    slot0Header +
+    slot0 +
+    slot0Sub1Header +
+    slot0Sub1 +
+    slot0Sub2Header +
+    slot0Sub2 +
+    slot0Sub3Header +
+    slot0Sub3 +
+    slot1Header +
+    slot1
+  );
+}
+
+export function buildS120(drive: SIEMENSS120, drivePIP: number): string {
+  const deviceHeader = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, "S120_CU320_2_PN_V52:6SL3 040-1MA01-0Axx (CU320-2 PN, S120)", "${drive.name}"\n`;
+  const slot0Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, "S120_CU320_2_PN_V52:6SL3 040-1MA01-0Axx (CU320-2 PN, S120)", "${drive.name}"\n`;
+  const slot0Sub1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 1, "_U7T_PNIO_INTERFACE_CU3X0_2_PN_2_PORTS_V52_CT", "PN-IO"\n`;
+  const slot0Sub2Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 2, "_U7T_PNIO_PORT_1_CU3X0_2_PN_V52_CT", "Port1"\n`;
+  const slot0Sub3Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 0, SUBSLOT 3, "_U7T_PNIO_PORT_2_CU3X0_2_PN_V52_CT", "Port2"\n`;
+  const slot1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, "_U7T_PNIO_MODULE_DO_WITH_PZD_S120_CU320_2_PN_V52_CT", "${drive.slot1}"\n`;
+  const slot1Sub1Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, SUBSLOT 1, "_U7T_PNIO_SUBMODULE_PAP_CT", "Module Access Point"\n`;
+  const slot1Sub2Header = `IOSUBSYSTEM ${drive.ioSubSystem}, IOADDRESS ${drive.nodeAddress}, SLOT 1, SUBSLOT 2, "_U7T_PNIO_SUBMODULE_IO_S120_CU320_2_PN_V52_CT", "${drive.slot1SubType}"\n`;
+
+  let ipAddress = "";
+  drive.ipAddress.forEach((item, _) => {
+    ipAddress += item.toString(16).padStart(2, "0");
+  });
+
+  const pnioData = `REDUNDANT 
+  BEGIN
+    ASSET_ID "D26FCA6AA81643BF82EA9A8CE01ECB3E"
+    INSTALLATION_DATE ""
+    HAS_SHARED_SUBMODULES "0"
+    ADDITIONAL_INFORMATION ""
+    PDM_PARAM "0"
+    PLANT_LOCATION ""
+    PN_HW_RELEASE "V6.0"
+    PN_SW_RELEASE "V5.20"
+    PN_VENDOR_ID "42"
+    PN_FIXED_UPDATE_TIME "1"
+    PN_MIN_VERSION "V2.31"
+    PN_DEVICE_ID "1281"
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "1"
+    POS_X "672"
+    POS_Y "262"
+    SIZE_X "78"
+    SIZE_Y "64"
+    MODULE_ADD_FLAGS "0"
+    PN_DEVICE_SCF_L "32"
+    CAX_APP_ID ""
+    PN_GENERATED_SCF "0"
+    SHARED_PROXY_DATA ""
+    PN_WATCHDOGFACTOR "3"
+    OBJECT_COPYABLE "1"
+    CREATOR ""
+    LIST_SUBMODULES ""
+    COMMENT ""
+    PN_DEVICE_UPD_TIME "128"
+    PLANT_DESIGNATION ""
+    IRT_GROUP_NR "1"
+  END\n`;
+
+  const slot0 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "03D777E412B445C1B449A48B6AEDEA3F"
+    MACADDRESS "080006010000"
+    IPACTIVE "1"
+    IPADDRESS "${ipAddress}"
+    SUBNETMASK "FFFFFF00"
+    ROUTERADDRESS "C0A80010"
+    ROUTERACTIVE "0"
+    ISOACTIVE "0"
+    PN_TI "0"
+    PN_TO "0"
+    PN_EQUIDISTANT_CYCLE "0"
+    PN_IPADDR_MODE_DEV "0"
+    PN_MIN_VERSION ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    POS_X "0"
+    POS_Y "0"
+    SIZE_X "0"
+    SIZE_Y "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16345, 0, 0, 0, 0, 0
+  PARAMETER 
+    IDS_HEAD_PRM_DS1_DIAG, "IDS_HEAD_PRM_DS1_DIAG_OFF"
+  END\n`;
+
+  const slot0Sub1 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "EDE43E2A94EE464699F36572EDB18082"
+    PN_TI "0"
+    PN_TO "0"
+    IRT_DETERMINATION_LEVEL "1"
+    PN_EQUIDISTANT_CYCLE "0"
+    NO_OF_EXT_CONTROLLER "0"
+    NO_SET_TO_MAX "0"
+    IRT_SYNC_FLAG "65280"
+    IRT_CACF "1"
+    IRT_DEVICE_CYCLE_GROUP ""
+    EXT_SENDCLOCK "32"
+    PN_DEVICE_FSU_PRIORITY "0"
+    IRT_ADJUST_TITO "1"
+    IRT_PN_USER_RATIO "30"
+    IRT_REDUNDANCY "1"
+    MRP_CONFIGURATION "mrpdomain-1	0"
+    IRT_PTCP_SUBDOMAIN_ID_DATA ""
+    PN_MIN_VERSION ""
+    IRT_PTCP_SUBDOMAIN_ID_HASH ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    IRT_BANDWIDTH_OVERRIDE_ALLOWED "0"
+    IRT_OPTIMIZATION_STRUCT ""
+    IRT_DOMAIN_NAME "syncdomain-default"
+    POS_X "0"
+    IRT_SENDCLOCK_FACTOR "32"
+    POS_Y "0"
+    SIZE_X "0"
+    MRP_MULTI_CONFIGURATION "00"
+    MRP_DIAGNOSIS "0"
+    SIZE_Y "0"
+    MRP_MULTI_DIAGNOSIS "0"
+    MRP_INSTANCES "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    IRT_PN_RATIO "-1"
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    IRT_SYNC_WHOLE_DEVICE "1"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16344, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot0Sub2 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "1C5F91460AC34F7394E44F7A74BFC52E"
+    IRT_FIBEROPTIC_CABLETYPE "0"
+    LINE_COMMENT ""
+    LINK_STATE_DIAG_NEW_VERSION "0"
+    LINE_DELAY "600"
+    LINK_STATE_DIAG_REQUIRE "0"
+    ETH_MEDIUM_RUNTIME_CHECK "1"
+    PORT_DEACTIVATED "0"
+    MRP_DOMAIN ""
+    PORT_DOMAIN_BOUNDARY "0"
+    PN_MIN_VERSION ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    PORT_DCP_BOUNDARY "0"
+    POS_X "0"
+    PORT_LLDP_BOUNDARY "0"
+    POS_Y "0"
+    PN_RINGSTATUS_STRUCT ""
+    SIZE_X "0"
+    IRT_LINE_RX_DELAY "0"
+    SIZE_Y "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    MULTICAST_BOUNDARY "0"
+    ETHERNET_MED_DUP "8"
+    IRT_FIBEROPTIC_TYPE "0"
+    LINE_DELAY_SELECTOR "0"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16347, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot0Sub3 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "961F2F1ABA7047FBAC534819AAD508C2"
+    IRT_FIBEROPTIC_CABLETYPE "0"
+    LINE_COMMENT ""
+    LINK_STATE_DIAG_NEW_VERSION "0"
+    LINE_DELAY "600"
+    LINK_STATE_DIAG_REQUIRE "0"
+    ETH_MEDIUM_RUNTIME_CHECK "1"
+    PORT_DEACTIVATED "0"
+    MRP_DOMAIN ""
+    PORT_DOMAIN_BOUNDARY "0"
+    PN_MIN_VERSION ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    PORT_DCP_BOUNDARY "0"
+    POS_X "0"
+    PORT_LLDP_BOUNDARY "0"
+    POS_Y "0"
+    PN_RINGSTATUS_STRUCT ""
+    SIZE_X "0"
+    IRT_LINE_RX_DELAY "0"
+    SIZE_Y "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    MULTICAST_BOUNDARY "0"
+    ETHERNET_MED_DUP "8"
+    IRT_FIBEROPTIC_TYPE "0"
+    LINE_DELAY_SELECTOR "0"
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16346, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot1 = `BEGIN 
+  ASSET_ID "C3213154C74E425B9D60D98ABF582129"
+  PN_TI "0"
+  PN_TO "0"
+  PN_EQUIDISTANT_CYCLE "0"
+  DRIVE_ID "-1"
+  PN_MIN_VERSION ""
+  GUI_HIDE "0"
+  OBJECT_REMOVEABLE "1"
+  POS_X "0"
+  POS_Y "0"
+  SIZE_X "0"
+  SIZE_Y "0"
+  PNDX_MODE "0"
+  CAX_APP_ID ""
+  OBJECT_COPYABLE "1"
+  CREATOR ""
+  COMMENT ""
+  IRT_GROUP_NR "1"
+  END\n`;
+
+  const slot1Sub1 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "A136AA38F0EE45C9AE856A113AEC167C"
+    PN_TI "0"
+    PN_TO "0"
+    PN_EQUIDISTANT_CYCLE "0"
+    IRT_SUBSLOT "1"
+    IRT_REDUNDANCY "1"
+    PN_MIN_VERSION ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    POS_X "0"
+    POS_Y "0"
+    SIZE_X "0"
+    SIZE_Y "0"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  16343, 0, 0, 0, 0, 0
+  END\n`;
+
+  const slot1Sub2 = `AUTOCREATED 
+  BEGIN 
+    ASSET_ID "20BF9F300A394A699ADF965418E4B765"
+    PN_TI "0"
+    PN_TELEGRAM_ID "352"
+    PN_TO "0"
+    PN_EQUIDISTANT_CYCLE "0"
+    IRT_SUBSLOT "2"
+    IRT_REDUNDANCY "1"
+    PN_MIN_VERSION ""
+    GUI_HIDE "0"
+    OBJECT_REMOVEABLE "0"
+    POS_X "0"
+    POS_Y "0"
+    SIZE_X "0"
+    SIZE_Y "0"
+    PN_ORIGINAL_TELEGRAM_ID "-1"
+    PNDX_MODE "0"
+    CAX_APP_ID ""
+    OBJECT_COPYABLE "0"
+    CREATOR ""
+    COMMENT ""
+    IRT_GROUP_NR "1"
+  LOCAL_IN_ADDRESSES 
+    ADDRESS  ${drive.startAddress}, 0, ${drive.totalInBytes}, ${drivePIP}, 0, 0
+  LOCAL_OUT_ADDRESSES 
+    ADDRESS  ${drive.startAddress}, 0, ${drive.totalOutBytes}, ${drivePIP}, 0, 0
+  END\n`;
+
+  return (
+    deviceHeader +
+    pnioData +
+    slot0Header +
+    slot0 +
+    slot0Sub1Header +
+    slot0Sub1 +
+    slot0Sub2Header +
+    slot0Sub2 +
+    slot0Sub3Header +
+    slot0Sub3 +
+    slot1Header +
+    slot1 +
+    slot1Sub1Header +
+    slot1Sub1 +
+    slot1Sub2Header +
+    slot1Sub2
+  );
+}

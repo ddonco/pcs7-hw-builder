@@ -140,7 +140,7 @@ export default {
         </div>
         <div class="flex flex-row pb-4">
           <div class="w-full">
-            <div class="flex pt-1 text-center divide-x divide-gray-500">
+            <div class="flex pt-1 text-center text-sm divide-x divide-gray-500">
               <ColumnNameConfig
                 :column-name="'Tag Name'"
                 :column-id="'tagName'"
@@ -162,9 +162,14 @@ export default {
                 :column-id="'driveType'"
               />
               <ColumnNameConfig
+                :column-name="'Telegram Type'"
+                :column-id="'telegramType'"
+              />
+              <ColumnNameConfig
                 :column-name="'Amp Rating'"
                 :column-id="'ampRating'"
               />
+              <ColumnNameConfig :column-name="'MCC'" :column-id="'mcc'" />
             </div>
           </div>
         </div>
@@ -181,16 +186,20 @@ export default {
             <p class="text-xs text-gray-500">
               Enter comma separated list of Drive type identifiers.
             </p>
-            <IOTypeIdentifier :io-type="'VFD'" :examples="'VFD,VFD FS'" />
-            <IOTypeIdentifier :io-type="'FVNR'" :examples="'FVNR'" />
-            <IOTypeIdentifier :io-type="'FVR'" :examples="'FVR'" />
+            <IOTypeIdentifier :io-type="'ABB VFD'" :examples="'VFD,VFD FS'" />
+            <IOTypeIdentifier :io-type="'ABB UMC'" :examples="'FVNR,FVR'" />
+            <IOTypeIdentifier :io-type="'Siemens VFD'" :examples="'S120'" />
+            <IOTypeIdentifier
+              :io-type="'Siemens SIMOCODE'"
+              :examples="'SIMOCODE'"
+            />
           </div>
         </div>
       </div>
     </div>
     <div class="flex pl-2 bg-emerald-100">
       <div class="text-3xl self-start">3.</div>
-      <div>
+      <div class="w-full">
         <div class="flex flex-row w-full pt-2 pl-2 cursor-default">
           <div
             class="w-full divide-y divide-gray-500 cursor-default font-semibold"

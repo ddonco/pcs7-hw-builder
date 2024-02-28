@@ -8,6 +8,7 @@ import {
   buildModuleSymbolTable,
 } from "./profinet_modules";
 import { buildUMC100, buildACSVFD } from "./profinet_abb_drives";
+import { buildSimocode, buildS120 } from "./profinet_siemens_drives";
 import { hwBuilderLogger } from "./logger";
 
 const childLogger = hwBuilderLogger.child({ component: "rack-builder" });
@@ -30,8 +31,11 @@ export function buildHWConfig(
 ): any {
   const sortedHW = sortHW(hardwareRacks);
   const enableAllChannels = buildOptions["enableAllChannels"];
+  const enableHartChannels = buildOptions["enableHartChannels"];
   const analogPIP = buildOptions["analogPIP"];
   const digitalPIP = buildOptions["digitalPIP"];
+
+  console.log(`enable hart ${enableHartChannels}`);
 
   // Parse addresses from strings to ints
   let ioStartAddressParsed: { [moduleType: string]: number } = {};
@@ -44,17 +48,22 @@ export function buildHWConfig(
     addressedHW = getGroupedIoAddresses(
       sortedHW,
       hardwareInfo,
-      ioStartAddressParsed
+      ioStartAddressParsed,
+      enableHartChannels
     );
   } else {
-    addressedHW = getShiftedIoAddresses(sortedHW, ioStartAddressParsed);
+    addressedHW = getShiftedIoAddresses(
+      sortedHW,
+      ioStartAddressParsed,
+      enableHartChannels
+    );
   }
 
   const writeStream = fs.createWriteStream(outFilePath);
   let buildString: string;
 
   const symbolTableFilePath =
-    outFilePath.split(".").slice(0, -1).join(".") + ".asc";
+    outFilePath.split(".").slice(0, -1).join(".") + "-SymbolTable.asc";
   const symbolTableStream = fs.createWriteStream(symbolTableFilePath);
 
   for (const rack in addressedHW) {
@@ -116,6 +125,7 @@ export function buildHWConfig(
           addressedHW[rack][slot].hartModulePartNumber,
           addressedHW[rack][slot].channels,
           enableAllChannels,
+          enableHartChannels,
           analogPIP
         );
       } else if (addressedHW[rack][slot].type === "AO") {
@@ -132,6 +142,7 @@ export function buildHWConfig(
           addressedHW[rack][slot].hartModulePartNumber,
           addressedHW[rack][slot].channels,
           enableAllChannels,
+          enableHartChannels,
           analogPIP
         );
       }
@@ -174,10 +185,14 @@ export function buildDrivesConfig(
   const symbolTableStream = fs.createWriteStream(symbolTableFilePath);
 
   for (const node in drives) {
-    if (drives[node].type === "VFD") {
+    if (drives[node].type === "ABB_VFD") {
       buildString = buildACSVFD(drives[node], drivePIP);
-    } else if (drives[node].type === "FVNR" || drives[node].type === "FVR") {
+    } else if (drives[node].type === "ABB_UMC100") {
       buildString = buildUMC100(drives[node], drivePIP);
+    } else if (drives[node].type === "SIEMENS_S120") {
+      buildString = buildS120(drives[node], drivePIP);
+    } else if (drives[node].type === "SIEMENS_SIMOCODE") {
+      buildString = buildSimocode(drives[node], drivePIP);
     }
     buildCsvString = `${drives[node].name},${drives[node].nodeAddress},${
       drives[node].startAddress
@@ -275,15 +290,21 @@ function sortHW(hardwareRacks: { [rack: string]: { [slot: string]: any } }): {
 
 function getShiftedIoAddresses(
   hardwareRacks: { [rack: string]: { [slot: string]: any } },
-  userAddress: { [ioType: string]: number }
+  userAddress: { [ioType: string]: number },
+  enableHartChannels: boolean
 ): { [rack: string]: { [slot: string]: any } } {
+  let hartOffset = 0;
+  // 8 Hart channels * 5 bytes per channel
+  if (enableHartChannels) hartOffset = 8 * 5;
+
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
       if (
         hardwareRacks[rack][slot].type === "AI" ||
         hardwareRacks[rack][slot].type === "AO"
       ) {
-        hardwareRacks[rack][slot].startAddress += userAddress["ai"] - 512;
+        hardwareRacks[rack][slot].startAddress +=
+          userAddress["ai"] - 512 + hartOffset;
       }
       if (
         hardwareRacks[rack][slot].type === "DI" ||
@@ -299,7 +320,8 @@ function getShiftedIoAddresses(
 function getGroupedIoAddresses(
   hardwareRacks: { [rack: string]: { [slot: string]: any } },
   hardwareInfo: { [ioType: string]: number },
-  startAddress: { [ioType: string]: number }
+  startAddress: { [ioType: string]: number },
+  enableHartChannels: boolean
 ): {
   [rack: string]: { [slot: string]: any };
 } {
@@ -337,13 +359,22 @@ function getGroupedIoAddresses(
     );
   }
 
+  let hartOffset = 0;
+  // 8 Hart channels * 5 bytes per channel
+  if (enableHartChannels) hartOffset = 8 * 5;
+  console.log(
+    `get grouped - hart: ${enableHartChannels} - offset: ${hartOffset}`
+  );
+
   for (const rack in hardwareRacks) {
     for (const slot in hardwareRacks[rack]) {
       if (hardwareRacks[rack][slot].type === "AI") {
+        hardwareRacks[rack][slot].totalInBytes += hartOffset;
         hardwareRacks[rack][slot].startAddress = nextAddress["AI"];
         nextAddress["AI"] = hardwareRacks[rack][slot].nextStartAddress();
       }
       if (hardwareRacks[rack][slot].type === "AO") {
+        hardwareRacks[rack][slot].totalInBytes += hartOffset;
         hardwareRacks[rack][slot].startAddress = nextAddress["AO"];
         nextAddress["AO"] = hardwareRacks[rack][slot].nextStartAddress();
       }
